@@ -1,0 +1,3 @@
+Dispatch Report:\nPatient Name: anmol\nAge: 45\nContact: 9980077961\nSymptoms: severe bleeding\nAnalysis Result: Critical Condition
+Severity: High
+Recommendation: Advanced Life Support Ambulance\nFinal Recommendation: Basic Life Support Ambulance\n

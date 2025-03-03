@@ -1,0 +1,18 @@
+Patient Name,Location,Symptoms,Status,null
+John Doe,123 Main St,Severe Chest Pain,Dispatched,Closed
+"Jane Smith	",456 Elm St,Difficulty Breathing,Dispatched,null
+Bob Johnson,789 Pine St,Fracture,Cancelled,null
+"Alice Brown	",321 Oak Ave,High Fever,Pending,null
+Charlie White,654 Maple Dr,Severe Headache,Pending,null
+Rohan Gupta,5638 Maple Ave,Chest Pain,Critical,null
+Riya Saxena,3401 Maple Ave,Abdominal Pain,Stable,null
+Vivek Choudhary,9749 Maple Ave,Seizure,Serious,null
+Vikram Iyer,9011 Main St,Difficulty Breathing,Serious,null
+Aarav Patel,8562 Oak Dr,Fracture,Serious,null
+Neha Verma,9757 Willow Ct,Difficulty Breathing,Serious,null
+Anjali Chauhan,1184 Parker St,Chest Pain,Critical,null
+Riya Saxena,5215 Broadway,Difficulty Breathing,Stable,null
+Kavya Bhatt,250 Pine St,Burns,Stable,null
+Ishita Sharma,6282 Willow Ct,Chest Pain,Serious,Closed
+Pooja Bhat,7263 Willow Ct,Difficulty Breathing,Critical,Resources Assigned
+Ishita Sharma,1989 Main St,Head Injury,Serious,null

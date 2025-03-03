@@ -1,0 +1,63 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "NursePage",
+            "request": "launch",
+            "mainClass": "badas.NursePage",
+            "projectName": ""
+        },
+        {
+            "type": "java",
+            "name": "ITSupportPage",
+            "request": "launch",
+            "mainClass": "badas.ITSupportPage",
+            "projectName": ""
+        },
+        {
+            "type": "java",
+            "name": "Login",
+            "request": "launch",
+            "mainClass": "badas.Login",
+            "projectName": ""
+        },
+        {
+            "type": "java",
+            "name": "TableDisplay",
+            "request": "launch",
+            "mainClass": "test.TableDisplay",
+            "projectName": "Info5100-University-Example_29e8e0d2"
+        },
+        {
+            "type": "java",
+            "name": "CourseCatalogManager",
+            "request": "launch",
+            "mainClass": "test.CourseCatalogManager",
+            "projectName": "Info5100-University-Example_29e8e0d2"
+        },
+        {
+            "type": "java",
+            "name": "Current File",
+            "request": "launch",
+            "mainClass": "${file}"
+        },
+        {
+            "type": "java",
+            "name": "CampusMainExample",
+            "request": "launch",
+            "mainClass": "info5100.university.example.Campus.CampusMainExample",
+            "projectName": "Info5100-University-Example_29e8e0d2"
+        },
+        {
+            "type": "java",
+            "name": "Info5001UniversityExample",
+            "request": "launch",
+            "mainClass": "info5100.university.example.Info5001UniversityExample",
+            "projectName": "Info5100-University-Example_29e8e0d2"
+        }
+    ]
+}

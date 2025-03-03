@@ -1,0 +1,18 @@
+java badas.Login,Password,Role
+ad,ad123,Admin
+d1,d1,Dispatcher
+d2,d2,Dispatcher
+doc1,doc1,Doctor
+doc2,doc2,Doctor
+nurse1,nurse1,Nurse
+nurse2,nurse2,Nurse
+nurse3,nurse3,Nurse
+rec1,rec1,Receptionist
+receptionist2,rec456,Receptionist
+ec1,ec1,Emergency Coordinator
+ec2,ec2,Emergency Coordinator
+it2,it456,IT Support
+anmol,shetty,Nurse
+prayag,adh,Admin
+abhi,abhi,IT Support
+darshan,patil,Doctor
