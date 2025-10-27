@@ -1,0 +1,16 @@
+# Python venv & caches
+.venv/
+__pycache__/
+.ipynb_checkpoints/
+
+# OS cruft
+.DS_Store
+
+# Data & artifacts (keep repo light)
+data/raw/
+data/processed/
+models/artifacts/
+models/forecasts/forecasts.csv
+
+# Local DB
+finmetrics.db
