@@ -1,0 +1,50 @@
+@import './base.css';
+
+/* Global layout
+   ------------------------------------------------------------------ */
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+}
+
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: #020617;
+  color: #f9fafb;
+}
+
+/* Make the Vue root app fully responsive and fluid.
+   The individual views/components are responsible for their own max-widths. */
+
+#app {
+  width: 100%;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  font-weight: normal;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Links
+   ------------------------------------------------------------------ */
+
+a {
+  text-decoration: none;
+  color: inherit;
+  transition: color 0.2s ease, background-color 0.2s ease;
+}
+
+/* Utility class if you want a primary accent link somewhere */
+.green {
+  color: hsla(160, 100%, 37%, 1);
+}
+
+@media (hover: hover) {
+  a:hover {
+    text-decoration: underline;
+  }
+}
