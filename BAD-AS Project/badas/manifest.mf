@@ -1,3 +1,4 @@
 Manifest-Version: 1.0
-X-COMMENT: Main-Class will be added automatically by build
+Main-Class: com.badas.Main
+Class-Path: lib/sqlite-jdbc-3.51.3.0.jar lib/flatlaf-3.7.1.jar
 

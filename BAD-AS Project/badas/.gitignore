@@ -1,0 +1,11 @@
+# Compiled output
+out/
+
+# SQLite database (created at runtime)
+badas.db
+
+# Auto-generated dispatch reports
+reports/
+
+# macOS
+.DS_Store
