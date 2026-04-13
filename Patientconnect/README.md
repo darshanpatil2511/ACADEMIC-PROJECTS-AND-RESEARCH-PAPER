@@ -1,4 +1,4 @@
-# PatientConnect – Clear Lakes Dental Patient Portal Prototype
+# PatientConnect — Clear Lakes Dental Patient Portal Prototype
 
 PatientConnect is a **patient-facing web portal prototype** built for a fictional deployment at **Clear Lakes Dental**.  
 It focuses on streamlining the **patient journey before a dental visit** by allowing patients to:
