@@ -29,3 +29,6 @@ yarn-error.log*
 .idea/
 *.swp
 *.swo
+
+# Private source repo — kept local, documented publicly in "BullFin-AI Overview/"
+BullFin-AI/
