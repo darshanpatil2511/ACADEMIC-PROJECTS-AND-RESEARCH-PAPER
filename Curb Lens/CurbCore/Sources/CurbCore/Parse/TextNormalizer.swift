@@ -12,7 +12,10 @@ public struct NormalizedText: Hashable, Sendable {
 /// Example: "N0 PARKING 8 a.m.-l2 NOON" -> "NO PARKING 8AM - 12PM".
 public enum TextNormalizer {
     public static func normalize(_ raw: String) -> NormalizedText {
-        var r = Rewriter(text: raw.uppercased())
+        // "TOW ZONÉ" -> "TOW ZONE": fold accents OCR sometimes adds.
+        let folded = raw.folding(options: [.diacriticInsensitive, .widthInsensitive], locale: Locale(identifier: "en_US_POSIX"))
+        var r = Rewriter(text: folded.uppercased())
+        if folded != raw { r.note("accents removed") }
 
         // "PARK|NG", "|2" — a vertical bar is almost always an I or a 1.
         r.replace(#"\|"#, with: "I")
@@ -40,6 +43,8 @@ public enum TextNormalizer {
         r.replace(#"\b(?:12\s*)?MIDNIGHT\b"#, with: "12AM")
         // "8 A M", "8 AM" (and "8 A.M." after punctuation removal) -> "8AM".
         r.replace(#"(\d)\s*([AP])\s*M\b"#, with: "$1$2M")
+        // "1201AM" -> "12:01AM", "730PM" -> "7:30PM" (OCR drops the colon).
+        r.replace(#"\b(1[0-2]|0?[1-9])([0-5][0-9])(AM|PM)\b"#, with: "$1:$2$3")
         // Space out separators and collapse whitespace.
         r.replace(#"\s*([&-])\s*"#, with: " $1 ", record: false)
         r.replace(#"\s+"#, with: " ", record: false)
@@ -88,6 +93,10 @@ struct Rewriter {
 
     init(text: String) {
         self.text = text
+    }
+
+    mutating func note(_ entry: String) {
+        log.append(entry)
     }
 
     mutating func replace(_ pattern: String, with template: String, record: Bool = true) {

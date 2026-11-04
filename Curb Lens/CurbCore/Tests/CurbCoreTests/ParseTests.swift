@@ -34,6 +34,14 @@ struct TextNormalizerTests {
         #expect(norm("TOWED") == "TOWED")
     }
 
+    @Test func iosSimulatorOCRQuirks() {
+        // Seen from the iOS Vision runtime on the South End photo.
+        #expect(norm("TOW ZONÉ") == "TOW ZONE")
+        #expect(norm("1201am - 7am") == "12:01AM - 7AM")
+        #expect(norm("730PM") == "7:30PM")
+        #expect(norm("1260AM") == "1260AM")   // not a real time: left alone
+    }
+
     @Test func specialCases() {
         #expect(norm("l HR PARKING") == "1 HR PARKING")
         #expect(norm("TOW-AWAY ZONE") == "TOW ZONE")

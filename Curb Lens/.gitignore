@@ -12,3 +12,6 @@ Package.resolved.bak
 
 # macOS
 .DS_Store
+
+# Sign photos used locally until replaced by our own (copyright unclear)
+CurbCore/Tests/CurbCoreTests/Fixtures/images/*.jp*g

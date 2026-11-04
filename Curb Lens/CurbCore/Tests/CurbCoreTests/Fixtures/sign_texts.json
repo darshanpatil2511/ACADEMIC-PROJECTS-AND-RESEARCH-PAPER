@@ -1097,7 +1097,62 @@
           "type": "snowEmergency"
         }
       }
-    ]
+    ],
+    "group": "south_end"
+  },
+  {
+    "name": "real_south_end_pole_ios_ocr",
+    "panels": [
+      "South End Parking",
+      "2 Hour Limit Mon-Fri 8am-6pm Except Resident Sticker",
+      "TOW ZONÉ",
+      "STREET CLEANING 1201am - 7am TUESDAY DURING",
+      "SNOW EMERGENCY"
+    ],
+    "expectedRules": [
+      {
+        "kind": {
+          "type": "timeLimit",
+          "minutes": 120
+        },
+        "days": {
+          "days": [
+            "MON",
+            "TUE",
+            "WED",
+            "THU",
+            "FRI"
+          ]
+        },
+        "window": {
+          "start": "08:00",
+          "end": "18:00"
+        },
+        "residentExempt": true
+      },
+      {
+        "kind": {
+          "type": "streetCleaning"
+        },
+        "days": {
+          "days": [
+            "TUE"
+          ]
+        },
+        "window": {
+          "start": "00:01",
+          "end": "07:00"
+        },
+        "towZone": true
+      },
+      {
+        "kind": {
+          "type": "snowEmergency"
+        }
+      }
+    ],
+    "group": "south_end",
+    "noisy": true
   },
   {
     "name": "parking_n_hour_limit_resident_exempt",
