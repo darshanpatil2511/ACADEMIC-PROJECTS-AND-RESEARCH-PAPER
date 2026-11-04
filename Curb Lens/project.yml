@@ -1,0 +1,53 @@
+name: CurbLens
+
+options:
+  bundleIdPrefix: com.darshanpatil
+  deploymentTarget:
+    iOS: "17.0"
+  createIntermediateGroups: true
+
+packages:
+  CurbCore:
+    path: CurbCore
+
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    CODE_SIGN_STYLE: Automatic
+    DEVELOPMENT_TEAM: "<MY_TEAM_ID>"   # TODO: replace with your 10-char Personal Team ID
+
+targets:
+  CurbLens:
+    type: application
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources:
+      - path: App
+        excludes:
+          - "**/.gitkeep"
+    dependencies:
+      - package: CurbCore
+        product: CurbCore
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.darshanpatil.curblens
+        PRODUCT_NAME: CurbLens
+        MARKETING_VERSION: "0.1.0"
+        CURRENT_PROJECT_VERSION: "1"
+        TARGETED_DEVICE_FAMILY: "1"
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_CFBundleDisplayName: CurbLens
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
+        INFOPLIST_KEY_UISupportedInterfaceOrientations: UIInterfaceOrientationPortrait
+        INFOPLIST_KEY_NSCameraUsageDescription: "CurbLens uses the camera to read parking signs. Images are processed on your iPhone and never leave it."
+        INFOPLIST_KEY_NSLocationWhenInUseUsageDescription: "CurbLens saves where a parking sign is so you can find it on the map later. Your location stays on your iPhone."
+        ENABLE_PREVIEWS: YES
+
+schemes:
+  CurbLens:
+    build:
+      targets:
+        CurbLens: all
+    run:
+      config: Debug
