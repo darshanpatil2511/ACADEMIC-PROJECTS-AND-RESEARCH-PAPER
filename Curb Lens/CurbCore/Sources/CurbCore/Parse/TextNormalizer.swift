@@ -27,6 +27,8 @@ public enum TextNormalizer {
 
         // "l HR" / "I HR" -> "1 HR" (a lone I/L can't be fixed by the digit rule).
         r.replace(#"\b[IL](?=\s*(?:HR|HRS|HOUR|HOURS)\b)"#, with: "1")
+        // "TOW LONE", "TOW 2ONE" — Z misread as L or 2 on real signs.
+        r.replace(#"\bTOW\s+[L2]ONE\b"#, with: "TOW ZONE")
         // "TOW-AWAY ZONE" -> "TOW ZONE"
         r.replace(#"\bTOW\s*-?\s*AWAY\b"#, with: "TOW")
         // "ANYTIME" -> "ANY TIME"

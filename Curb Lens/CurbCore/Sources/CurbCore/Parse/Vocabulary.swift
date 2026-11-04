@@ -5,11 +5,13 @@ enum Vocabulary {
         var map: [String: String] = [:]
         let canonical = ["NO", "PARKING", "STOPPING", "STANDING", "TOW", "ZONE", "STREET", "CLEANING",
                          "SWEEPING", "HOUR", "MIN", "RESIDENT", "PERMIT", "ONLY", "EXCEPT", "ANY", "TIME",
-                         "ALL", "LOADING", "SNOW", "EMERGENCY", "DAILY", "LIMIT"]
+                         "ALL", "LOADING", "SNOW", "EMERGENCY", "DAILY", "LIMIT",
+                         "STICKER", "COMMERCIAL", "PICK", "UP", "DROP", "OFF", "METER"]
         for word in canonical { map[word] = word }
         let aliases = ["HR": "HOUR", "HRS": "HOUR", "HOURS": "HOUR",
                        "MINS": "MIN", "MINUTE": "MIN", "MINUTES": "MIN",
-                       "RESIDENTS": "RESIDENT", "PERMITS": "PERMIT", "TIMES": "TIME"]
+                       "RESIDENTS": "RESIDENT", "PERMITS": "PERMIT", "TIMES": "TIME",
+                       "STICKERS": "STICKER", "METERS": "METER", "METERED": "METER", "PICKUP": "PICK"]
         for (alias, word) in aliases { map[alias] = word }
         return map
     }()
@@ -17,7 +19,11 @@ enum Vocabulary {
     /// Words that often appear on signs but don't change the rule. They count as understood.
     static let fillers: Set<String> = [
         "VEHICLES", "VEHICLE", "WILL", "BE", "TOWED", "AT", "OWNER", "OWNERS", "EXPENSE",
-        "ROUTE", "OF", "THE", "MONTH", "EACH", "EVERY", "AWAY", "COMMERCIAL", "THIS", "AREA",
+        "ROUTE", "OF", "THE", "MONTH", "EACH", "EVERY", "AWAY", "THIS", "AREA",
+        // "DURING SNOW EMERGENCY", "PAY MULTI-SPACE METER TO PARK", "AS DEFINED BY B.T.D.",
+        // "DRIVER MUST STAY WITH VEHICLE"
+        "DURING", "PAY", "MULTI", "SPACE", "PARK", "AS", "DEFINED", "BY", "BTD",
+        "DRIVER", "MUST", "STAY", "WITH",
     ]
 
     static let days: [String: Weekday] = [

@@ -249,6 +249,20 @@ struct EvaluateTests {
         #expect(v == .canPark(moveBy: nil, notes: []))
     }
 
+    @Test func residentExemptionAppliesOnlyWithAPermit() {
+        // "PARKING 2 HOUR LIMIT MON-FRI 8AM-6PM EXCEPT RESIDENT STICKER"
+        var rule = twoHour
+        rule.days = .days([.mon, .tue, .wed, .thu, .fri])
+        rule.window = TimeWindow(start: t(8), end: t(18))
+        rule.residentExempt = true
+        let visitor = RuleEngine.evaluate(rules: [rule], arrival: at(2026, 11, 4, 10), calendar: cal, permitZone: nil)
+        #expect(visitor.moveBy == at(2026, 11, 4, 12))
+        guard case let .canPark(_, notes) = visitor else { Issue.record("expected canPark"); return }
+        #expect(notes.contains { $0.contains("exempt") })
+        let resident = RuleEngine.evaluate(rules: [rule], arrival: at(2026, 11, 4, 10), calendar: cal, permitZone: "SOUTH END")
+        #expect(resident == .canPark(moveBy: nil, notes: []))
+    }
+
     @Test func noRulesMeansUnreadable() {
         let v = RuleEngine.evaluate(rules: [], arrival: at(2026, 11, 4, 10), calendar: cal, permitZone: nil)
         guard case .unreadable = v else { Issue.record("expected unreadable, got \(v)"); return }

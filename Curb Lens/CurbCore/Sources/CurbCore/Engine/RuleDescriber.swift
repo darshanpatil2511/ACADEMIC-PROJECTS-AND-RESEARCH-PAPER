@@ -11,6 +11,7 @@ public enum RuleDescriber {
         if let season = rule.season {
             text += ", " + seasonLabel(season)
         }
+        if rule.residentExempt { text += ", residents exempt" }
         if rule.towZone { text += " (tow zone)" }
         return text
     }

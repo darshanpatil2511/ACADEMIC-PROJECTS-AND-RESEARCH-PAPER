@@ -15,10 +15,7 @@ let package = Package(
         .package(url: "https://github.com/apple/swift-argument-parser", from: "1.3.0"),
     ],
     targets: [
-        .target(
-            name: "CurbCore",
-            exclude: ["Vision/.gitkeep"]
-        ),
+        .target(name: "CurbCore"),
         .executableTarget(
             name: "curbeval",
             dependencies: [

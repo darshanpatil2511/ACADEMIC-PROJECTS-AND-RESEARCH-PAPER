@@ -27,6 +27,11 @@ the user whether they can park now and when they must move. Fully on-device.
                        -destination 'platform=iOS Simulator,name=<NAME>' build
   (get <NAME> from: xcrun simctl list devices available)
 - Read one image:    swift run --package-path CurbCore curbeval read <path>
+                       [--fast] [--no-crop] [--no-lang-correction] [--no-fallback]
+                       [--at 2026-11-10T09:00] [--save-crop /tmp/crop.png] [--neural-engine]
+  (On macOS Vision runs on the CPU by default: a cold Neural Engine fails with
+  "e5rtError ... 13" after every rebuild. iOS uses the Neural Engine with CPU fallback.)
+- Skip photo tests:  SKIP_VISION=1 swift test --package-path CurbCore
 - Run eval:          swift run --package-path CurbCore curbeval eval \
                        --dataset Dataset --out Reports
 

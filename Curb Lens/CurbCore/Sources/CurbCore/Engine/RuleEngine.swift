@@ -81,8 +81,10 @@ public enum RuleEngine {
 
         let start = truncatedToMinute(arrival, calendar: calendar)
         let notes = self.notes(for: rules, permitZone: permitZone)
-        let prohibiting = rules.filter { isProhibiting($0, permitZone: permitZone) }
-        let limits: [(rule: ParkingRule, limit: Int)] = rules.compactMap { rule in
+        // "EXCEPT RESIDENT STICKER": a car with a permit ignores these rules entirely.
+        let applicable = rules.filter { !($0.residentExempt && permitZone != nil) }
+        let prohibiting = applicable.filter { isProhibiting($0, permitZone: permitZone) }
+        let limits: [(rule: ParkingRule, limit: Int)] = applicable.compactMap { rule in
             if case let .timeLimit(minutes) = rule.kind, minutes > 0 { return (rule, minutes) }
             return nil
         }
@@ -135,6 +137,10 @@ public enum RuleEngine {
             notes.append(snowEmergencyNote)
         }
         if permitZone == nil {
+            for rule in rules where rule.residentExempt {
+                let note = "Resident permit holders are exempt: \(RuleDescriber.describe(rule))"
+                if !notes.contains(note) { notes.append(note) }
+            }
             for rule in rules {
                 guard case .permitOnly = rule.kind else { continue }
                 let note = "Resident permit required: \(RuleDescriber.describe(rule))"

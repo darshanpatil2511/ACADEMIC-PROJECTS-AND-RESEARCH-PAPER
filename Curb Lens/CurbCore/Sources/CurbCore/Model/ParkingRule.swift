@@ -8,7 +8,8 @@ import Foundation
 //     "days":   {"nth": [2, 4], "weekday": "TUE"}     // or {"days":["MON","WED"]} or "everyDay" (default)
 //     "window": {"start": "08:00", "end": "12:00"},   // omit for all day
 //     "season": {"startMonth": 4, "startDay": 1, "endMonth": 11, "endDay": 30},  // omit for all year
-//     "towZone": true                                 // default false
+//     "towZone": true,                                // default false
+//     "residentExempt": true                          // "EXCEPT RESIDENT STICKER"; default false
 //   }
 
 /// Day of the week. Raw values match `Calendar` `.weekday` (Sunday = 1).
@@ -230,16 +231,19 @@ public struct ParkingRule: Hashable, Sendable, Codable {
     /// nil means all year.
     public var season: SeasonalRange?
     public var towZone: Bool
+    /// "EXCEPT RESIDENT STICKER": the rule doesn't apply to cars with a resident permit.
+    public var residentExempt: Bool
     /// The panel text the rule came from.
     public var sourceText: String
 
     public init(kind: RestrictionKind, days: DayRule, window: TimeWindow?,
-                season: SeasonalRange?, towZone: Bool, sourceText: String) {
+                season: SeasonalRange?, towZone: Bool, residentExempt: Bool = false, sourceText: String) {
         self.kind = kind
         self.days = days
         self.window = window
         self.season = season
         self.towZone = towZone
+        self.residentExempt = residentExempt
         self.sourceText = sourceText
     }
 
@@ -250,7 +254,7 @@ public struct ParkingRule: Hashable, Sendable, Codable {
         return copy
     }
 
-    private enum CodingKeys: String, CodingKey { case kind, days, window, season, towZone, sourceText }
+    private enum CodingKeys: String, CodingKey { case kind, days, window, season, towZone, residentExempt, sourceText }
 
     public init(from decoder: Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
@@ -259,6 +263,7 @@ public struct ParkingRule: Hashable, Sendable, Codable {
         window = try c.decodeIfPresent(TimeWindow.self, forKey: .window)
         season = try c.decodeIfPresent(SeasonalRange.self, forKey: .season)
         towZone = try c.decodeIfPresent(Bool.self, forKey: .towZone) ?? false
+        residentExempt = try c.decodeIfPresent(Bool.self, forKey: .residentExempt) ?? false
         sourceText = try c.decodeIfPresent(String.self, forKey: .sourceText) ?? ""
     }
 
@@ -269,6 +274,7 @@ public struct ParkingRule: Hashable, Sendable, Codable {
         try c.encodeIfPresent(window, forKey: .window)
         try c.encodeIfPresent(season, forKey: .season)
         try c.encode(towZone, forKey: .towZone)
+        if residentExempt { try c.encode(true, forKey: .residentExempt) }
         try c.encode(sourceText, forKey: .sourceText)
     }
 }

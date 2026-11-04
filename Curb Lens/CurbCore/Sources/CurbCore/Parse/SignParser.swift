@@ -182,19 +182,45 @@ struct ParseContext {
         if kw(i, "LOADING") {
             return Head(kind: .loadingZone, range: i..<(kw(i + 1, "ZONE") ? i + 2 : i + 1))
         }
-        // "RESIDENT PERMIT PARKING ONLY", "PERMIT PARKING ONLY", "RESIDENT PARKING"
-        if kw(i, "RESIDENT", "PERMIT") {
+        // "EXCEPT COMMERCIAL VEHICLES" under a no-parking symbol (the symbol isn't text) is a
+        // commercial loading zone: no parking for a regular car.
+        if kw(i, "COMMERCIAL") {
+            var j = i + 1
+            if case .filler("VEHICLES")? = free(j) { j += 1 } else if case .filler("VEHICLE")? = free(j) { j += 1 }
+            return Head(kind: .loadingZone, range: (kw(i - 1, "EXCEPT") ? i - 1 : i)..<j)
+        }
+        // "PICK UP / DROP OFF ZONE", "DROP OFF ZONE" — brief stops only, so no parking.
+        if kw(i, "PICK"), kw(i + 1, "UP") {
+            var j = i + 2
+            if kw(j, "DROP"), kw(j + 1, "OFF") { j += 2 }
+            if kw(j, "ZONE") { j += 1 }
+            return Head(kind: .loadingZone, range: i..<j)
+        }
+        if kw(i, "DROP"), kw(i + 1, "OFF") {
+            return Head(kind: .loadingZone, range: i..<(kw(i + 2, "ZONE") ? i + 3 : i + 2))
+        }
+        // "RESIDENT PERMIT PARKING ONLY", "PERMIT PARKING ONLY", "RESIDENT PARKING".
+        // Not "EXCEPT RESIDENT STICKER" — that's an exemption, handled in buildRules.
+        if kw(i, "RESIDENT", "PERMIT"), !kw(i - 1, "EXCEPT") {
             var j = i
             while kw(j, "RESIDENT", "PERMIT", "PARKING", "ONLY") { j += 1 }
             return Head(kind: .permit, range: i..<j)
         }
-        // "2 HOUR PARKING", "1 HR PARKING", "15 MIN PARKING", "2 HOUR LIMIT"
-        if let n = number(i), n > 0, kw(i + 1, "HOUR", "MIN") {
-            let minutes = kw(i + 1, "HOUR") ? n * 60 : n
-            var j = i + 2
-            if kw(j, "PARKING") { j += 1 }
-            if kw(j, "LIMIT") { j += 1 }
-            return Head(kind: .timeLimit(minutes: minutes), range: i..<j)
+        // "2 HOUR PARKING", "1 HR PARKING", "15 MIN PARKING", "PARKING 2 HOUR LIMIT",
+        // "2 HOUR PARKING METER LIMIT", and "2 PARKING HOUR METER LIMIT" (OCR reads a stacked "2" first).
+        if let n = number(i), n > 0 {
+            var j = i + 1
+            var skipped = 0
+            while skipped < 2, kw(j, "PARKING", "METER") {
+                j += 1
+                skipped += 1
+            }
+            guard kw(j, "HOUR", "MIN") else { return nil }
+            let minutes = kw(j, "HOUR") ? n * 60 : n
+            j += 1
+            while kw(j, "PARKING", "METER", "LIMIT") { j += 1 }
+            let start = kw(i - 1, "PARKING") && !kw(i - 2, "NO") ? i - 1 : i
+            return Head(kind: .timeLimit(minutes: minutes), range: start..<j)
         }
         return nil
     }
@@ -203,26 +229,64 @@ struct ParseContext {
 
     func segments(for heads: [Head]) -> [Segment] {
         var segments = [Segment(head: nil, heads: [], start: 0, end: tokens.count)]
-        for head in heads {
+        // Panels before the first head that carry their own times or days belong to a sign we
+        // couldn't read (e.g. "HOUR PARKING METER LIMIT 7AM-4PM" with the "2" missed). Keep them
+        // apart so their times don't leak into the next rule. Headers like "TOW ZONE" still attach.
+        if let first = heads.first {
+            let firstPanelStart = panelStart(of: first.range.lowerBound)
+            if firstPanelStart > 0, (0..<firstPanelStart).contains(where: { carriesSchedule($0) }) {
+                segments[0].end = firstPanelStart
+                segments.append(Segment(head: nil, heads: [], start: firstPanelStart, end: tokens.count))
+            }
+        }
+        for (index, head) in heads.enumerated() {
             let last = segments.count - 1
-            if let merged = Self.merge(segments[last].head, head.kind) {
+            let nextHeadStart = index + 1 < heads.count ? heads[index + 1].range.lowerBound : tokens.count
+            let hasOwnSchedule = (head.range.upperBound..<nextHeadStart).contains { isTime($0) }
+            if let merged = Self.merge(segments[last].head, head.kind, newHasOwnSchedule: hasOwnSchedule) {
                 segments[last].head = merged
                 segments[last].heads.append(head)
                 continue
             }
-            // A new rule starts. If its panel has no earlier head, the whole panel belongs to it.
+            // A new rule starts. If its panel has no earlier head, the whole panel belongs to it, and so
+            // do header panels right above it with no schedule of their own ("TOW ZONE", "SOUTH END").
             let previousHeadEnd = segments[last].heads.last?.range.upperBound ?? segments[last].start
-            let panelStart = tokens.indices.first { panelOf[$0] == panelOf[head.range.lowerBound] }
-                ?? head.range.lowerBound
-            let boundary = panelStart >= previousHeadEnd ? panelStart : head.range.lowerBound
+            let headPanelStart = panelStart(of: head.range.lowerBound)
+            var boundary = headPanelStart >= previousHeadEnd ? headPanelStart : head.range.lowerBound
+            while boundary == panelStart(of: boundary), boundary > previousHeadEnd {
+                let above = panelStart(of: boundary - 1)
+                guard above >= previousHeadEnd, !(above..<boundary).contains(where: { carriesSchedule($0) }) else { break }
+                boundary = above
+            }
             segments[last].end = boundary
             segments.append(Segment(head: head.kind, heads: [head], start: boundary, end: tokens.count))
         }
         return segments
     }
 
+    private func panelStart(of index: Int) -> Int {
+        guard index < tokens.count else { return tokens.count }
+        var i = index
+        while i > 0, panelOf[i - 1] == panelOf[index] { i -= 1 }
+        return i
+    }
+
+    private func isTime(_ i: Int) -> Bool {
+        if case .time = tokens[i].kind { return true }
+        return false
+    }
+
+    /// Times, days, ordinals, months or numbers: the panel describes when, not just what.
+    private func carriesSchedule(_ i: Int) -> Bool {
+        switch tokens[i].kind {
+        case .time, .day, .ordinal, .month, .number: return true
+        default: return false
+        }
+    }
+
     /// Whether a new head continues the current rule. Returns the combined kind, or nil to start a new rule.
-    static func merge(_ current: HeadKind?, _ new: HeadKind) -> HeadKind? {
+    /// `newHasOwnSchedule` says whether a time range follows the new head before the next head.
+    static func merge(_ current: HeadKind?, _ new: HeadKind, newHasOwnSchedule: Bool) -> HeadKind? {
         guard let current else { return new }
         switch (current, new) {
         // "NO PARKING / TOW ZONE / STREET CLEANING / ..." is one street-cleaning rule.
@@ -231,6 +295,10 @@ struct ParseContext {
         // "SNOW EMERGENCY ROUTE / TOW ZONE / NO PARKING" is one snow-emergency rule.
         case (.snowEmergency, .noParking):
             return .snowEmergency
+        // "EXCEPT COMMERCIAL VEHICLES 7AM-7PM / 30 MINUTE LIMIT": the limit is for commercial
+        // vehicles; for everyone else it's a loading zone. Only when the limit has no hours of its own.
+        case (.loadingZone, .timeLimit), (.loadingZone, .loadingZone):
+            return newHasOwnSchedule ? nil : .loadingZone
         default:
             return nil
         }
@@ -247,6 +315,7 @@ struct ParseContext {
         for h in segment.heads { mark(h.range) }
 
         let towZone = takeTowZone()
+        let residentExempt = takeResidentExemption()
         takeAnyTime()
         let season = takeSeason()
         let windows = takeWindows()
@@ -282,8 +351,21 @@ struct ParseContext {
         let source = tokens[segment.start..<segment.end].map(\.text).joined(separator: " ")
         let ruleWindows: [TimeWindow?] = windows.isEmpty ? [nil] : windows
         return ruleWindows.map {
-            ParkingRule(kind: kind, days: days, window: $0, season: season, towZone: towZone, sourceText: source)
+            ParkingRule(kind: kind, days: days, window: $0, season: season, towZone: towZone,
+                        residentExempt: residentExempt, sourceText: source)
         }
+    }
+
+    // "EXCEPT RESIDENT STICKER", "EXCEPT RESIDENT PERMIT", "EXCEPT RESIDENTS".
+    private mutating func takeResidentExemption() -> Bool {
+        var found = false
+        for i in lo..<hi where kw(i, "EXCEPT") && kw(i + 1, "RESIDENT", "PERMIT") {
+            var j = i + 2
+            while kw(j, "RESIDENT", "PERMIT", "STICKER", "PARKING") { j += 1 }
+            mark(i..<j)
+            found = true
+        }
+        return found
     }
 
     // "TOW ZONE" anywhere in the segment.
