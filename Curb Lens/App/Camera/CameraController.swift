@@ -23,8 +23,8 @@ final class CameraController: NSObject, @unchecked Sendable {
     }
 
     let session = AVCaptureSession()
-    /// Gate for live frames: one in flight, ~3 per second, only while steady.
-    let throttle = FrameThrottle(maxPerSecond: 3)
+    /// Gate for live frames: one in flight, at most 2 per second (accurate OCR), only while steady.
+    let throttle = FrameThrottle(maxPerSecond: 2)
     /// Called on the video queue with an upright-able frame when the throttle lets one through.
     /// The handler must call `throttle.end()` when it has finished with the frame.
     var onFrame: ((CGImage) -> Void)?

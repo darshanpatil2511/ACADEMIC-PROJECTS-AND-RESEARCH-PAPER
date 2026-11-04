@@ -80,18 +80,22 @@ struct ScannerView: View {
             .background(color.opacity(0.6), in: Capsule())
     }
 
+    /// Always available: a stable live reading is a bonus, not a requirement. It turns green when the
+    /// last frames agree, so the user knows the capture will most likely read well.
     private var captureButton: some View {
         Button {
             Task { await model.capture() }
         } label: {
-            Label("Capture", systemImage: "camera.circle.fill")
+            Label(model.stableRules == nil ? "Capture" : "Capture — reading is stable",
+                  systemImage: "camera.circle.fill")
                 .font(.headline)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 6)
         }
         .buttonStyle(.borderedProminent)
+        .tint(model.stableRules == nil ? .accentColor : .green)
         .controlSize(.large)
-        .disabled(model.stableRules == nil || model.isCapturing)
+        .disabled(model.isCapturing || model.cameraState != .running)
         .padding(.top, 8)
     }
 
@@ -101,6 +105,7 @@ struct ScannerView: View {
             hudItem("OCR", String(format: "%.0f ms", model.lastOCRMilliseconds))
             hudItem("Steady", model.isSteady ? "yes" : "no")
             hudItem("Votes", "\(model.topVotes)/3")
+            hudItem("Rules", "\(model.latestReading?.parse.rules.count ?? 0)")
         }
         .font(.caption.monospacedDigit())
         .foregroundStyle(.white)

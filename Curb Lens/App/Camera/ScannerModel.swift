@@ -33,8 +33,9 @@ final class ScannerModel {
     let camera = CameraController()
     var session: AVCaptureSession { camera.session }
 
-    /// Live frames: fast OCR, crop on, no full-image second pass (it would double the cost per frame).
-    nonisolated static let liveOptions = ReaderOptions(level: .fast, cropToSign: true, fullImageFallback: false)
+    /// Live frames use the same accurate reader as stills. Fast OCR was tried first: it drops the times
+    /// on real signs ("7am-7pm" unread), so frames rarely agreed and the vote never settled.
+    nonisolated static let liveOptions = ReaderOptions.accurate
 
     private let motion = MotionGate()
     private let reader = SignReader()
