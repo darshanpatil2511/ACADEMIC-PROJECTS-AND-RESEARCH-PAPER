@@ -1,9 +1,14 @@
 import CurbCore
+import SwiftData
 import SwiftUI
 
 struct ResultView: View {
     let result: ScanResult
 
+    @Environment(\.modelContext) private var context
+    /// Set once the sign is saved (by "Save sign" or "I parked here").
+    @State private var savedSign: SavedSign?
+    @State private var saving = false
     @State private var overrideTime = false
     @State private var customTime = Date()
 
@@ -20,6 +25,9 @@ struct ResultView: View {
                     VerdictCard(presentation: VerdictFormatter.present(verdict, now: now, calendar: calendar),
                                 towZone: RuleEngine.towZoneApplies(rules: reading.parse.rules, verdict: verdict,
                                                                    at: now, calendar: calendar))
+                    // Parking always uses the real clock, even with the debug time override on.
+                    ParkHereButton(canPark: currentVerdictAllowsParking) { await saveIfNeeded() }
+                    saveButton
                     if needsDoubleCheck { warningRow }
                     rulesSection
                     photoSection
@@ -38,6 +46,44 @@ struct ResultView: View {
         .navigationTitle("Sign")
         .navigationBarTitleDisplayMode(.inline)
         .onAppear(perform: applyDemoTimeIfRequested)
+        .task { await parkIfDemoRequested() }
+    }
+
+    // MARK: Saving
+
+    private var currentVerdictAllowsParking: Bool {
+        RuleEngine.evaluate(rules: reading.parse.rules, arrival: Date(), calendar: calendar, permitZone: nil).isCanPark
+    }
+
+    private var saveButton: some View {
+        Button {
+            Task { _ = await saveIfNeeded() }
+        } label: {
+            Group {
+                if saving {
+                    ProgressView()
+                } else if savedSign != nil {
+                    Label("Saved", systemImage: "checkmark")
+                } else {
+                    Label("Save sign", systemImage: "mappin.and.ellipse")
+                }
+            }
+            .frame(maxWidth: .infinity)
+        }
+        .buttonStyle(.bordered)
+        .controlSize(.large)
+        .disabled(saving || savedSign != nil)
+    }
+
+    /// Saves the sign with the current location the first time; later calls return the same sign.
+    private func saveIfNeeded() async -> SavedSign? {
+        if let savedSign { return savedSign }
+        saving = true
+        defer { saving = false }
+        let fix = await LocationProvider.shared.currentFix()
+        let sign = ParkingService.saveSign(reading, location: fix, in: context, now: Date())
+        savedSign = sign
+        return sign
     }
 
     // MARK: Sections
@@ -127,6 +173,17 @@ struct ResultView: View {
         }
     }
 
+    /// Debug aid: `-CurbLensDemoPark YES` saves the sign and starts a parking session (simulator screenshots).
+    private func parkIfDemoRequested() async {
+        #if DEBUG
+        guard UserDefaults.standard.bool(forKey: "CurbLensDemoPark"), savedSign == nil,
+              let sign = await saveIfNeeded() else { return }
+        let outcome = await ParkingService.park(at: sign, location: sign.fix, in: context, now: Date(),
+                                                  scheduleReminders: false)
+        print("[CurbLens] demo park: moveBy=\(String(describing: outcome?.session.moveBy)) reminders=\(outcome?.remindersScheduled ?? -1)")
+        #endif
+    }
+
     /// Debug aid: `-CurbLensDemoTime 2026-11-10T09:00` starts with the time override on.
     private func applyDemoTimeIfRequested() {
         #if DEBUG
@@ -150,21 +207,8 @@ struct VerdictCard: View {
     let presentation: VerdictPresentation
     let towZone: Bool
 
-    private var color: Color {
-        switch presentation.tone {
-        case .go: return .green
-        case .stop: return .red
-        case .unknown: return .gray
-        }
-    }
-
-    private var symbol: String {
-        switch presentation.tone {
-        case .go: return "checkmark.circle.fill"
-        case .stop: return "xmark.octagon.fill"
-        case .unknown: return "questionmark.circle.fill"
-        }
-    }
+    private var color: Color { presentation.tone.color }
+    private var symbol: String { presentation.tone.symbol }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {

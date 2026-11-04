@@ -1,14 +1,22 @@
 import PhotosUI
+import SwiftData
 import SwiftUI
 
 struct HomeView: View {
+    @Query(filter: #Predicate<ParkingSession> { $0.endedAt == nil }, sort: \ParkingSession.startedAt, order: .reverse)
+    private var activeSessions: [ParkingSession]
     @State private var model = ScanViewModel()
     @State private var pickerItem: PhotosPickerItem?
+    /// Debug aid: `-CurbLensOpenSaved YES` opens the saved-signs screen on launch.
+    @State private var showSaved = UserDefaults.standard.bool(forKey: "CurbLensOpenSaved")
 
     var body: some View {
         @Bindable var model = model
         NavigationStack {
             VStack(spacing: 24) {
+                if let session = activeSessions.first {
+                    ParkedBanner(session: session)
+                }
                 Spacer()
                 VStack(spacing: 6) {
                     Image(systemName: "parkingsign.circle.fill")
@@ -31,6 +39,15 @@ struct HomeView: View {
                 .controlSize(.large)
                 .disabled(model.status == .reading)
 
+                NavigationLink {
+                    SavedSignsView()
+                } label: {
+                    Label("Saved signs", systemImage: "map")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.bordered)
+                .controlSize(.large)
+
                 statusView
                     .frame(minHeight: 44)
             }
@@ -38,6 +55,8 @@ struct HomeView: View {
             .navigationDestination(item: $model.result) { result in
                 ResultView(result: result)
             }
+            .navigationDestination(isPresented: $showSaved) { SavedSignsView() }
+            .navigationDestination(for: SavedSign.self) { SavedSignDetailView(sign: $0) }
             .onChange(of: pickerItem) { _, item in
                 guard let item else { return }
                 Task {
@@ -111,4 +130,5 @@ private struct ProminentButtonLook: ViewModifier {
 
 #Preview {
     HomeView()
+        .modelContainer(for: [SavedSign.self, ParkingSession.self], inMemory: true)
 }
