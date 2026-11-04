@@ -17,7 +17,7 @@ let package = Package(
     targets: [
         .target(
             name: "CurbCore",
-            exclude: ["Model/.gitkeep", "Engine/.gitkeep", "Parse/.gitkeep", "Vision/.gitkeep"]
+            exclude: ["Parse/.gitkeep", "Vision/.gitkeep"]
         ),
         .executableTarget(
             name: "curbeval",
