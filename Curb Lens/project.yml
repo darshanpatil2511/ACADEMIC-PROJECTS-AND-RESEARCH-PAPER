@@ -14,7 +14,7 @@ settings:
   base:
     SWIFT_VERSION: "5.0"
     CODE_SIGN_STYLE: Automatic
-    DEVELOPMENT_TEAM: "<MY_TEAM_ID>"   # TODO: replace with your 10-char Personal Team ID
+    DEVELOPMENT_TEAM: "KY54C58Y8V"   # Personal Team (free Apple ID)
 
 targets:
   CurbLens:
