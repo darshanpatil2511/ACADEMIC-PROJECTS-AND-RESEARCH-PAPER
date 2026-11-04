@@ -27,6 +27,9 @@ final class ScannerModel {
     var isCapturing = false
     var captured: ScanResult?
     var showHUD = false
+    /// Displayed zoom (1× = main lens) and lens buttons.
+    var zoom: CGFloat = 1
+    var zoomPresets: [CGFloat] = [1]
     var processedFPS: Double = 0
     var lastOCRMilliseconds: Double = 0
 
@@ -65,6 +68,9 @@ final class ScannerModel {
             cameraState = .failed(error.localizedDescription)
             return
         }
+
+        zoomPresets = camera.zoomInfo.presets
+        zoom = 1
 
         let reader = self.reader
         let throttle = camera.throttle
@@ -115,6 +121,16 @@ final class ScannerModel {
             stableRules = vote.stableRules
             if !wasStable, vote.stableRules != nil { haptics.notificationOccurred(.success) }
         }
+    }
+
+    // MARK: Zoom
+
+    func setZoom(_ display: CGFloat, animated: Bool) {
+        let info = camera.zoomInfo
+        let clamped = min(max(display, info.minDisplay), info.maxDisplay)
+        guard abs(clamped - zoom) > 0.005 else { return }
+        zoom = clamped
+        camera.setZoom(display: clamped, animated: animated)
     }
 
     func liveVerdict(at date: Date) -> Verdict? {

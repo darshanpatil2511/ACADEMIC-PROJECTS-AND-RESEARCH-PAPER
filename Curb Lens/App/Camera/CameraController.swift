@@ -3,7 +3,8 @@ import CoreImage
 import CurbCore
 import QuartzCore
 
-/// Owns the AVFoundation capture session: back wide camera, 1080p BGRA video frames for live reading,
+/// Owns the AVFoundation capture session: back camera (multi-lens when available, for real optical zoom),
+/// 1080p BGRA video frames for live reading,
 /// and a photo output for the full-resolution accurate pass.
 ///
 /// All session work happens on `sessionQueue`, frames arrive on `videoQueue`; nothing blocks the main thread.
@@ -22,7 +23,20 @@ final class CameraController: NSObject, @unchecked Sendable {
         }
     }
 
+    /// Zoom range and lens presets, in the numbers the Camera app shows (1× = main wide lens).
+    struct ZoomInfo: Equatable, Sendable {
+        var minDisplay: CGFloat = 1
+        var maxDisplay: CGFloat = 1
+        /// Multiply a device zoom factor by this to get the displayed value (0.5 when the virtual device starts at ultra-wide).
+        var displayMultiplier: CGFloat = 1
+        /// Lens-switch points and 2×, e.g. [0.5, 1, 2, 4].
+        var presets: [CGFloat] = [1]
+    }
+
     let session = AVCaptureSession()
+    /// Set during `configure()`.
+    private(set) var zoomInfo = ZoomInfo()
+    private var device: AVCaptureDevice?
     /// Gate for live frames: one in flight, at most 2 per second (accurate OCR), only while steady.
     let throttle = FrameThrottle(maxPerSecond: 2)
     /// Called on the video queue with an upright-able frame when the throttle lets one through.
@@ -91,10 +105,9 @@ final class CameraController: NSObject, @unchecked Sendable {
 
     private func configureOnSessionQueue() throws {
         guard !configured else { return }
-        guard let device = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back) else {
-            throw CameraError.noCamera
-        }
+        guard let device = Self.bestBackCamera() else { throw CameraError.noCamera }
         let input = try AVCaptureDeviceInput(device: device)
+        self.device = device
 
         session.beginConfiguration()
         defer { session.commitConfiguration() }
@@ -121,9 +134,67 @@ final class CameraController: NSObject, @unchecked Sendable {
         if device.isFocusModeSupported(.continuousAutoFocus) { device.focusMode = .continuousAutoFocus }
         if device.isExposureModeSupported(.continuousAutoExposure) { device.exposureMode = .continuousAutoExposure }
         if device.isAutoFocusRangeRestrictionSupported { device.autoFocusRangeRestriction = .none }
+        let zoom = Self.zoomInfo(for: device)
+        device.videoZoomFactor = Self.clampedFactor(1 / zoom.displayMultiplier, device: device)   // start at 1×
         device.unlockForConfiguration()
 
+        zoomInfo = zoom
         configured = true
+    }
+
+    // MARK: - Zoom
+
+    /// Sets the zoom using the displayed value (1× = main lens). Animated for lens buttons, direct for pinch.
+    func setZoom(display: CGFloat, animated: Bool) {
+        sessionQueue.async {
+            guard let device = self.device else { return }
+            let factor = Self.clampedFactor(display / self.zoomInfo.displayMultiplier, device: device)
+            do {
+                try device.lockForConfiguration()
+                if animated {
+                    device.ramp(toVideoZoomFactor: factor, withRate: 8)
+                } else {
+                    device.cancelVideoZoomRamp()
+                    device.videoZoomFactor = factor
+                }
+                device.unlockForConfiguration()
+            } catch {
+                // Zoom is best-effort; keep the current factor.
+            }
+        }
+    }
+
+    /// Prefers the virtual multi-camera devices: as zoom changes they switch to the ultra-wide or
+    /// telephoto lens, so 4× is real optics instead of an upscaled crop (much better for OCR).
+    private static func bestBackCamera() -> AVCaptureDevice? {
+        let preferred: [AVCaptureDevice.DeviceType] = [.builtInTripleCamera, .builtInDualWideCamera,
+                                                       .builtInDualCamera, .builtInWideAngleCamera]
+        let found = AVCaptureDevice.DiscoverySession(deviceTypes: preferred, mediaType: .video, position: .back).devices
+        for type in preferred {
+            if let device = found.first(where: { $0.deviceType == type }) { return device }
+        }
+        return nil
+    }
+
+    private static func zoomInfo(for device: AVCaptureDevice) -> ZoomInfo {
+        let switchOvers = device.virtualDeviceSwitchOverVideoZoomFactors.map { CGFloat(truncating: $0) }
+        let hasUltraWide = device.constituentDevices.contains { $0.deviceType == .builtInUltraWideCamera }
+        // On a virtual device with an ultra-wide lens, factor 1 is the ultra-wide (shown as 0.5×) and the
+        // first switch-over is the main lens (1×).
+        let multiplier: CGFloat = hasUltraWide ? 1 / (switchOvers.first ?? 2) : 1
+
+        let minDisplay = device.minAvailableVideoZoomFactor * multiplier
+        // Beyond ~10× the image is mostly digital upscaling and OCR stops improving.
+        let maxDisplay = min(device.maxAvailableVideoZoomFactor * multiplier, 10)
+        var presets: [CGFloat] = [1, 2] + switchOvers.map { $0 * multiplier }
+        if hasUltraWide { presets.append(minDisplay) }
+        let rounded = Set(presets.map { ($0 * 10).rounded() / 10 }).filter { $0 >= minDisplay - 0.01 && $0 <= maxDisplay + 0.01 }
+        return ZoomInfo(minDisplay: minDisplay, maxDisplay: maxDisplay, displayMultiplier: multiplier,
+                        presets: rounded.sorted())
+    }
+
+    private static func clampedFactor(_ factor: CGFloat, device: AVCaptureDevice) -> CGFloat {
+        min(max(factor, device.minAvailableVideoZoomFactor), device.maxAvailableVideoZoomFactor)
     }
 }
 

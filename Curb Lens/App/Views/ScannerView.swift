@@ -5,6 +5,8 @@ import SwiftUI
 /// frames agree. Capture takes a full-resolution photo and runs the accurate reader.
 struct ScannerView: View {
     @State private var model = ScannerModel()
+    /// Zoom when the current pinch began.
+    @State private var pinchStartZoom: CGFloat?
     @Environment(\.openURL) private var openURL
 
     var body: some View {
@@ -15,6 +17,7 @@ struct ScannerView: View {
             case .starting, .running:
                 CameraPreview(session: model.session)
                     .ignoresSafeArea()
+                    .gesture(pinchToZoom)
                 LiveOverlay(reading: model.latestReading)
                     .ignoresSafeArea()
                     .allowsHitTesting(false)
@@ -52,6 +55,7 @@ struct ScannerView: View {
             TimelineView(.periodic(from: .now, by: 30)) { context in
                 statusCard(now: context.date)
             }
+            zoomControls
             captureButton
         }
         .padding()
@@ -82,6 +86,47 @@ struct ScannerView: View {
 
     /// Always available: a stable live reading is a bonus, not a requirement. It turns green when the
     /// last frames agree, so the user knows the capture will most likely read well.
+    // MARK: Zoom
+
+    private var pinchToZoom: some Gesture {
+        MagnifyGesture()
+            .onChanged { value in
+                let start = pinchStartZoom ?? model.zoom
+                if pinchStartZoom == nil { pinchStartZoom = start }
+                model.setZoom(start * value.magnification, animated: false)
+            }
+            .onEnded { _ in pinchStartZoom = nil }
+    }
+
+    /// Lens buttons like the Camera app; the one nearest the current zoom shows the exact value.
+    private var zoomControls: some View {
+        let nearest = model.zoomPresets.min { abs($0 - model.zoom) < abs($1 - model.zoom) }
+        return HStack(spacing: 8) {
+            ForEach(model.zoomPresets, id: \.self) { preset in
+                let selected = preset == nearest
+                Button {
+                    model.setZoom(preset, animated: true)
+                } label: {
+                    Text(selected ? Self.zoomLabel(model.zoom) + "×" : Self.zoomLabel(preset))
+                        .font(.caption.weight(.bold).monospacedDigit())
+                        .foregroundStyle(selected ? .yellow : .white)
+                        .frame(minWidth: 38, minHeight: 38)
+                        .background(.black.opacity(selected ? 0.7 : 0.45), in: Circle())
+                }
+                .accessibilityLabel("Zoom \(Self.zoomLabel(preset)) times")
+            }
+        }
+        .padding(6)
+        .background(.black.opacity(0.25), in: Capsule())
+        .padding(.top, 6)
+    }
+
+    /// "0.5", "1", "2", "2.7"
+    static func zoomLabel(_ value: CGFloat) -> String {
+        let rounded = (value * 10).rounded() / 10
+        return rounded == rounded.rounded() ? String(format: "%.0f", rounded) : String(format: "%.1f", rounded)
+    }
+
     private var captureButton: some View {
         Button {
             Task { await model.capture() }
@@ -103,6 +148,7 @@ struct ScannerView: View {
         HStack(spacing: 14) {
             hudItem("FPS", String(format: "%.1f", model.processedFPS))
             hudItem("OCR", String(format: "%.0f ms", model.lastOCRMilliseconds))
+            hudItem("Zoom", Self.zoomLabel(model.zoom) + "×")
             hudItem("Steady", model.isSteady ? "yes" : "no")
             hudItem("Votes", "\(model.topVotes)/3")
             hudItem("Rules", "\(model.latestReading?.parse.rules.count ?? 0)")
