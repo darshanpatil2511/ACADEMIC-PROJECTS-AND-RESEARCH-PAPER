@@ -5,7 +5,7 @@ import SwiftUI
 
 /// One saved sign: today's verdict, "I parked here", the rules, the photo and where it is.
 struct SavedSignDetailView: View {
-    let sign: SavedSign
+    @Bindable var sign: SavedSign
 
     @Environment(\.modelContext) private var context
     @Environment(\.dismiss) private var dismiss
@@ -23,6 +23,7 @@ struct SavedSignDetailView: View {
                                                                    at: now, calendar: .boston))
                     ParkHereButton(canPark: verdict.isCanPark) { sign }
                     rulesSection
+                    noteSection
                     locationSection
                     if let data = sign.photoJPEG, let image = UIImage(data: data) {
                         VStack(alignment: .leading, spacing: 8) {
@@ -66,6 +67,16 @@ struct SavedSignDetailView: View {
         }
     }
 
+    private var noteSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Note").font(.headline)
+            TextField("e.g. my side of the street, meter broken", text: $sign.note, axis: .vertical)
+                .lineLimit(1...4)
+                .textFieldStyle(.roundedBorder)
+                .submitLabel(.done)
+        }
+    }
+
     @ViewBuilder private var locationSection: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text("Location").font(.headline)
@@ -92,10 +103,11 @@ struct SavedSignDetailView: View {
         }
     }
 
-    /// "Facing NE · within 8 m"
+    /// "Facing NE · camera 12° up · within 8 m"
     private var locationDetail: String {
         var parts: [String] = []
         if let heading = sign.headingDegrees { parts.append("Facing \(GeoText.cardinal(heading))") }
+        if let pitch = sign.pitchDegrees { parts.append(GeoText.pitchLabel(degrees: pitch)) }
         if let accuracy = sign.accuracyMeters, accuracy > 0 { parts.append("within \(Int(accuracy.rounded())) m") }
         return parts.isEmpty ? "Location saved" : parts.joined(separator: " · ")
     }

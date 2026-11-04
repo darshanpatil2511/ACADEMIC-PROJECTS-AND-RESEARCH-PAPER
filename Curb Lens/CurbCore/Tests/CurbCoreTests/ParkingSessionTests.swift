@@ -91,6 +91,23 @@ struct GeoTextTests {
         #expect(GeoText.distanceMeters(lat1: 42.35, lon1: -71.06, lat2: 42.35, lon2: -71.06) == 0)
     }
 
+    @Test func cameraPitchFromGravity() {
+        // Upright portrait: camera looks at the horizon.
+        #expect(abs(GeoText.cameraPitchDegrees(gravityX: 0, gravityY: -1, gravityZ: 0)) < 0.001)
+        // Flat on a table, screen up: camera looks straight down.
+        #expect(abs(GeoText.cameraPitchDegrees(gravityX: 0, gravityY: 0, gravityZ: -1) - (-90)) < 0.001)
+        // Tilted back 30° to aim at a sign high on a pole: g = (0, -cos30, +sin30).
+        #expect(abs(GeoText.cameraPitchDegrees(gravityX: 0, gravityY: -0.866, gravityZ: 0.5) - 30) < 0.1)
+        // Not unit length (accelerometer noise) still works.
+        #expect(abs(GeoText.cameraPitchDegrees(gravityX: 0, gravityY: -1.7, gravityZ: 1) - 30.5) < 0.2)
+    }
+
+    @Test func pitchLabels() {
+        #expect(GeoText.pitchLabel(degrees: 12.4) == "camera 12° up")
+        #expect(GeoText.pitchLabel(degrees: -8) == "camera 8° down")
+        #expect(GeoText.pitchLabel(degrees: 1.2) == "camera level")
+    }
+
     @Test func distanceLabels() {
         #expect(GeoText.distanceLabel(meters: 12) == "12 m")
         #expect(GeoText.distanceLabel(meters: 999) == "999 m")

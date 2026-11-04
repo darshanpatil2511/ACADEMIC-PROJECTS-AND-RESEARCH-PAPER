@@ -8,6 +8,11 @@ import SwiftUI
 struct ScanResult: Identifiable, Hashable {
     let id = UUID()
     let reading: SignReading
+    /// Where the phone was, and which way it faced, when the scanner captured the photo
+    /// (nil for imported photos: they may have been taken anywhere).
+    var captureFix: LocationFix?
+    /// Camera angle above the horizon at capture, from CoreMotion.
+    var capturePitchDegrees: Double?
 
     static func == (lhs: ScanResult, rhs: ScanResult) -> Bool { lhs.id == rhs.id }
     func hash(into hasher: inout Hasher) { hasher.combine(id) }

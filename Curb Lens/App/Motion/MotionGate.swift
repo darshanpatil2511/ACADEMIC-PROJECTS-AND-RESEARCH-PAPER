@@ -6,8 +6,9 @@ import CurbCore
 final class MotionGate {
     private let manager = CMMotionManager()
 
-    /// The latest device pitch in radians (used later to tag saved signs).
-    private(set) var pitch: Double = 0
+    /// Where the back camera points relative to the horizon, in degrees (+ up), from the latest sample.
+    /// Saved with each captured sign.
+    private(set) var cameraPitchDegrees: Double?
 
     /// `handler` runs on the main queue for every sample.
     func start(handler: @escaping (_ steady: Bool, _ sample: MotionSample) -> Void) {
@@ -19,7 +20,9 @@ final class MotionGate {
         manager.deviceMotionUpdateInterval = 1.0 / 30.0
         manager.startDeviceMotionUpdates(to: .main) { [weak self] motion, _ in
             guard let motion else { return }
-            self?.pitch = motion.attitude.pitch
+            self?.cameraPitchDegrees = GeoText.cameraPitchDegrees(gravityX: motion.gravity.x,
+                                                                  gravityY: motion.gravity.y,
+                                                                  gravityZ: motion.gravity.z)
             let sample = MotionSample(gravityY: motion.gravity.y,
                                       rotationRate: (motion.rotationRate.x, motion.rotationRate.y, motion.rotationRate.z))
             handler(SteadinessRule.isSteady(sample), sample)

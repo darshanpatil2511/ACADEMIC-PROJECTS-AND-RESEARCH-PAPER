@@ -119,6 +119,9 @@ private struct SavedSignRow: View {
                 .frame(width: 56, height: 56)
             VStack(alignment: .leading, spacing: 3) {
                 Text(sign.title).font(.subheadline.weight(.semibold)).lineLimit(2)
+                if !sign.note.isEmpty {
+                    Text(sign.note).font(.caption).foregroundStyle(.secondary).lineLimit(1)
+                }
                 Label(presentation.title, systemImage: presentation.tone.symbol)
                     .font(.caption.weight(.semibold))
                     .foregroundStyle(presentation.tone.color)

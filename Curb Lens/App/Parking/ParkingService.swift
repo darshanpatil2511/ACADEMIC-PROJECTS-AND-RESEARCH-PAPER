@@ -14,10 +14,12 @@ enum ParkingService {
         let notificationsAllowed: Bool
     }
 
-    static func saveSign(_ reading: SignReading, location: LocationFix?, in context: ModelContext, now: Date) -> SavedSign {
+    static func saveSign(_ reading: SignReading, location: LocationFix?, pitchDegrees: Double?,
+                         in context: ModelContext, now: Date) -> SavedSign {
         let sign = SavedSign(createdAt: now, rules: reading.parse.rules,
                              panelText: reading.panels.joined(separator: "\n"),
-                             photoJPEG: Thumbnail.jpeg(from: reading.ocrImage), location: location)
+                             photoJPEG: Thumbnail.jpeg(from: reading.ocrImage), location: location,
+                             pitchDegrees: pitchDegrees)
         context.insert(sign)
         try? context.save()
         return sign
@@ -73,6 +75,17 @@ enum ReminderScheduler {
             return (try? await center.requestAuthorization(options: [.alert, .sound])) ?? false
         }
     }
+
+    #if DEBUG
+    /// Debug aid: runs a real reminder through `ReminderPlanner` and the scheduler with a move-by time
+    /// one minute from now, so delivery can be checked without waiting for a real deadline.
+    static func scheduleTestReminder(rules: [ParkingRule], now: Date) async -> Bool {
+        guard await requestPermission() else { return false }
+        let verdict = Verdict.canPark(moveBy: now.addingTimeInterval(60), notes: [])
+        let plan = ReminderPlanner.plan(rules: rules, verdict: verdict, now: now, calendar: .boston)
+        return !(await schedule(plan, sessionID: UUID())).isEmpty
+    }
+    #endif
 
     /// Returns the identifiers of the requests that were added.
     static func schedule(_ plan: [PlannedReminder], sessionID: UUID) async -> [String] {

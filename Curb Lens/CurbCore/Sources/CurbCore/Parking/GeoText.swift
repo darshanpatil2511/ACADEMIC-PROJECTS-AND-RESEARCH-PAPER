@@ -21,6 +21,22 @@ public enum GeoText {
         return 2 * earthRadius * asin(min(1, a.squareRoot()))
     }
 
+    /// How far the back camera points above (+) or below (−) the horizon, in degrees, from a CoreMotion
+    /// gravity vector in device coordinates. The back camera looks along the device's −z axis, so its
+    /// "up" component is gravity.z (normalized): upright portrait = 0°, flat screen-up = −90°.
+    public static func cameraPitchDegrees(gravityX: Double, gravityY: Double, gravityZ: Double) -> Double {
+        let length = (gravityX * gravityX + gravityY * gravityY + gravityZ * gravityZ).squareRoot()
+        guard length > 0 else { return 0 }
+        return asin(max(-1, min(1, gravityZ / length))) * 180 / .pi
+    }
+
+    /// "camera 12° up", "camera 8° down", "camera level" (within 2°).
+    public static func pitchLabel(degrees: Double) -> String {
+        let rounded = Int(degrees.magnitude.rounded())
+        if rounded < 2 { return "camera level" }
+        return "camera \(rounded)° \(degrees > 0 ? "up" : "down")"
+    }
+
     /// "12 m", "1.4 km"
     public static func distanceLabel(meters: Double) -> String {
         if meters < 1_000 { return "\(Int(meters.rounded())) m" }

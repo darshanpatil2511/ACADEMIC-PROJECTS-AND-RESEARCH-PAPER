@@ -148,6 +148,10 @@ final class ScannerModel {
             isCapturing = false
             camera.throttle.setEnabled(isSteady)
         }
+        // Tag the sign with where the phone is and how it is aimed at the moment of capture,
+        // fetched while the photo is taken and read.
+        let pitch = motion.cameraPitchDegrees
+        async let fix = LocationProvider.shared.currentFix()
         do {
             let data = try await camera.capturePhoto()
             let reader = self.reader
@@ -158,7 +162,7 @@ final class ScannerModel {
             #if DEBUG
             print("[CurbLens] capture panels: \(reading.panels)  rules: \(reading.parse.rules.map(RuleDescriber.describe))  \(Int(reading.timings.total)) ms")
             #endif
-            captured = ScanResult(reading: reading)
+            captured = ScanResult(reading: reading, captureFix: await fix, capturePitchDegrees: pitch)
             voter.reset()
             stableRules = nil
             topVotes = 0

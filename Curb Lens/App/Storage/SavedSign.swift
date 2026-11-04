@@ -13,6 +13,10 @@ final class SavedSign {
     var accuracyMeters: Double?
     /// Compass heading (degrees, 0 = north) the camera faced when the sign was saved.
     var headingDegrees: Double?
+    /// Camera angle above (+) or below the horizon when captured; nil for imported photos.
+    var pitchDegrees: Double?
+    /// The user's own note, e.g. "my side of the street". Defaulted so older stores migrate.
+    var note: String = ""
     /// `[ParkingRule]` as JSON (`RuleArchive`).
     var rulesData: Data
     var panelText: String
@@ -21,7 +25,8 @@ final class SavedSign {
     @Relationship(deleteRule: .nullify, inverse: \ParkingSession.sign)
     var sessions: [ParkingSession] = []
 
-    init(createdAt: Date, rules: [ParkingRule], panelText: String, photoJPEG: Data?, location: LocationFix?) {
+    init(createdAt: Date, rules: [ParkingRule], panelText: String, photoJPEG: Data?, location: LocationFix?,
+         pitchDegrees: Double? = nil) {
         self.id = UUID()
         self.createdAt = createdAt
         self.rulesData = (try? RuleArchive.encode(rules)) ?? Data()
@@ -31,6 +36,8 @@ final class SavedSign {
         self.longitude = location?.longitude
         self.accuracyMeters = location?.accuracyMeters
         self.headingDegrees = location?.headingDegrees
+        self.pitchDegrees = pitchDegrees
+        self.note = ""
     }
 
     var rules: [ParkingRule] { (try? RuleArchive.decode(rulesData)) ?? [] }

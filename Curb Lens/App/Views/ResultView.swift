@@ -10,6 +10,7 @@ struct ResultView: View {
     @State private var savedSign: SavedSign?
     @State private var saving = false
     @State private var overrideTime = false
+    @State private var testReminderStatus: String?
     @State private var customTime = Date()
 
     private let calendar = Calendar.boston
@@ -80,8 +81,11 @@ struct ResultView: View {
         if let savedSign { return savedSign }
         saving = true
         defer { saving = false }
-        let fix = await LocationProvider.shared.currentFix()
-        let sign = ParkingService.saveSign(reading, location: fix, in: context, now: Date())
+        // Scanner captures already carry the fix from the moment of capture; imported photos use where you are now.
+        let fix: LocationFix?
+        if let captured = result.captureFix { fix = captured } else { fix = await LocationProvider.shared.currentFix() }
+        let sign = ParkingService.saveSign(reading, location: fix, pitchDegrees: result.capturePitchDegrees,
+                                           in: context, now: Date())
         savedSign = sign
         return sign
     }
@@ -155,6 +159,17 @@ struct ResultView: View {
             if overrideTime {
                 DatePicker("Pretend it's", selection: $customTime)
                     .environment(\.timeZone, calendar.timeZone)
+            }
+            Divider()
+            Button("Send test reminder in 1 minute") {
+                Task {
+                    let ok = await ReminderScheduler.scheduleTestReminder(rules: reading.parse.rules, now: Date())
+                    testReminderStatus = ok ? "Scheduled. Lock the phone and wait a minute."
+                                            : "Notifications are off for CurbLens (Settings → Notifications)."
+                }
+            }
+            if let testReminderStatus {
+                Text(testReminderStatus).font(.footnote).foregroundStyle(.secondary)
             }
         }
         .padding(12)
