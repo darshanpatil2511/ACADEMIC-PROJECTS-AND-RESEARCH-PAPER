@@ -84,9 +84,13 @@ public enum EvalMetrics {
 
 /// p50 / p95 / mean of a set of latencies in milliseconds.
 public struct LatencyStats: Codable, Hashable, Sendable {
+    /// Median.
     public var p50: Double
+    /// 95th percentile.
     public var p95: Double
+    /// Average.
     public var mean: Double
+    /// Number of samples.
     public var count: Int
 
     public init(_ values: [Double]) {

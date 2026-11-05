@@ -6,12 +6,13 @@ enum Vocabulary {
         let canonical = ["NO", "PARKING", "STOPPING", "STANDING", "TOW", "ZONE", "STREET", "CLEANING",
                          "SWEEPING", "HOUR", "MIN", "RESIDENT", "PERMIT", "ONLY", "EXCEPT", "ANY", "TIME",
                          "ALL", "LOADING", "SNOW", "EMERGENCY", "DAILY", "LIMIT",
-                         "STICKER", "COMMERCIAL", "PICK", "UP", "DROP", "OFF", "METER"]
+                         "STICKER", "COMMERCIAL", "PICK", "UP", "DROP", "OFF", "METER", "VALET", "DATE"]
         for word in canonical { map[word] = word }
         let aliases = ["HR": "HOUR", "HRS": "HOUR", "HOURS": "HOUR",
                        "MINS": "MIN", "MINUTE": "MIN", "MINUTES": "MIN",
                        "RESIDENTS": "RESIDENT", "PERMITS": "PERMIT", "TIMES": "TIME",
-                       "STICKERS": "STICKER", "METERS": "METER", "METERED": "METER", "PICKUP": "PICK"]
+                       "STICKERS": "STICKER", "METERS": "METER", "METERED": "METER", "PICKUP": "PICK",
+                       "DATES": "DATE"]
         for (alias, word) in aliases { map[alias] = word }
         return map
     }()
@@ -42,6 +43,21 @@ enum Vocabulary {
         "AUG": 8, "AUGUST": 8, "SEP": 9, "SEPT": 9, "SEPTEMBER": 9, "OCT": 10, "OCTOBER": 10,
         "NOV": 11, "NOVEMBER": 11, "DEC": 12, "DECEMBER": 12,
     ]
+
+    /// Boston resident-permit districts as they're printed on sign headers ("SOUTH END", "FENWAY/KENMORE"),
+    /// longest first so "WEST ROXBURY" wins over "ROXBURY". A permit rule takes its zone from these.
+    static let districts: [[String]] = [
+        ["ALLSTON", "BRIGHTON"], ["AUDUBON", "CIRCLE"], ["BACK", "BAY"], ["BAY", "VILLAGE"], ["BEACON", "HILL"],
+        ["EAST", "BOSTON"], ["FENWAY", "KENMORE"], ["HYDE", "PARK"], ["JAMAICA", "PLAIN"], ["LEATHER", "DISTRICT"],
+        ["MISSION", "HILL"], ["NORTH", "END"], ["SOUTH", "BOSTON"], ["SOUTH", "END"], ["WEST", "END"],
+        ["WEST", "ROXBURY"],
+        ["ALLSTON"], ["BRIGHTON"], ["CHARLESTOWN"], ["CHINATOWN"], ["DORCHESTER"], ["DOWNTOWN"], ["FENWAY"],
+        ["KENMORE"], ["MATTAPAN"], ["ROSLINDALE"], ["ROXBURY"],
+    ]
+
+    /// Long sign words an OCR token one letter away may be corrected to ("NOVOMBER" -> "NOVEMBER").
+    static let fuzzyTargets: [String] = Set(keywords.keys).union(days.keys).union(months.keys)
+        .filter { $0.count >= 5 }.sorted()
 
     /// Words the normalizer rewrites itself (ranges, noon, midnight).
     static let specialWords: Set<String> = ["NOON", "MIDNIGHT", "TO", "THRU", "THROUGH", "AND", "ANYTIME"]

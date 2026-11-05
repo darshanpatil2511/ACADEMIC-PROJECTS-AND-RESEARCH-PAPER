@@ -56,6 +56,7 @@ public enum Weekday: Int, CaseIterable, Sendable, Comparable, Codable {
 
 /// A wall-clock time, stored as minutes since midnight (0...1439). Encoded as "HH:mm".
 public struct TimeOfDay: Hashable, Comparable, Sendable, Codable, CustomStringConvertible {
+    /// Minutes since midnight, 0...1439.
     public var minutes: Int
 
     public init(minutes: Int) {
@@ -66,7 +67,9 @@ public struct TimeOfDay: Hashable, Comparable, Sendable, Codable, CustomStringCo
         self.init(minutes: hour * 60 + minute)
     }
 
+    /// 0...23
     public var hour: Int { minutes / 60 }
+    /// 0...59
     public var minute: Int { minutes % 60 }
 
     public var description: String { String(format: "%02d:%02d", hour, minute) }
@@ -96,7 +99,9 @@ public struct TimeOfDay: Hashable, Comparable, Sendable, Codable, CustomStringCo
 /// A daily time range. The end is exclusive: 8AM–12PM is active 8:00 through 11:59.
 /// When `end <= start` the window runs overnight into the next day.
 public struct TimeWindow: Codable, Hashable, Sendable {
+    /// First minute the window is active.
     public var start: TimeOfDay
+    /// First minute after the window (exclusive).
     public var end: TimeOfDay
 
     public init(start: TimeOfDay, end: TimeOfDay) {
@@ -104,6 +109,7 @@ public struct TimeWindow: Codable, Hashable, Sendable {
         self.end = end
     }
 
+    /// True for windows like 10PM-6AM that cross midnight.
     public var isOvernight: Bool { end <= start }
 }
 
@@ -154,7 +160,9 @@ public enum DayRule: Hashable, Sendable, Codable {
 
 /// A date range within the year, inclusive at both ends. May wrap the year (DEC 1 - MAR 31).
 public struct SeasonalRange: Codable, Hashable, Sendable {
+    /// First day of the season (inclusive).
     public var startMonth: Int, startDay: Int
+    /// Last day of the season (inclusive).
     public var endMonth: Int, endDay: Int
 
     public init(startMonth: Int, startDay: Int, endMonth: Int, endDay: Int) {
@@ -224,12 +232,15 @@ public enum RestrictionKind: Hashable, Sendable, Codable {
 
 /// One rule, usually parsed from one panel of a sign.
 public struct ParkingRule: Hashable, Sendable, Codable {
+    /// What the rule restricts.
     public var kind: RestrictionKind
+    /// Which days it applies to (for overnight windows: the day the window starts).
     public var days: DayRule
     /// nil means all day.
     public var window: TimeWindow?
     /// nil means all year.
     public var season: SeasonalRange?
+    /// The panel says TOW ZONE.
     public var towZone: Bool
     /// "EXCEPT RESIDENT STICKER": the rule doesn't apply to cars with a resident permit.
     public var residentExempt: Bool
@@ -287,11 +298,13 @@ public enum Verdict: Codable, Hashable, Sendable {
     case cannotPark(reason: String, allowedFrom: Date?)
     case unreadable(reason: String)
 
+    /// True for `.canPark`.
     public var isCanPark: Bool {
         if case .canPark = self { return true }
         return false
     }
 
+    /// The move-by time of a `.canPark` verdict, if any.
     public var moveBy: Date? {
         if case let .canPark(moveBy, _) = self { return moveBy }
         return nil

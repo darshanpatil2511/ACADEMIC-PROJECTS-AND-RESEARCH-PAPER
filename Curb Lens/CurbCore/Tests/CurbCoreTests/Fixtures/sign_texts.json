@@ -865,7 +865,7 @@
   {
     "name": "no_parking_en_dash_tues",
     "panels": [
-      "NO PARKING 8AM–12PM TUES"
+      "NO PARKING 8AM\u201312PM TUES"
     ],
     "expectedRules": [
       {
@@ -1105,7 +1105,7 @@
     "panels": [
       "South End Parking",
       "2 Hour Limit Mon-Fri 8am-6pm Except Resident Sticker",
-      "TOW ZONÉ",
+      "TOW ZON\u00c9",
       "STREET CLEANING 1201am - 7am TUESDAY DURING",
       "SNOW EMERGENCY"
     ],
@@ -1365,5 +1365,311 @@
       "PIZZA OPEN 11AM-10PM DAILY"
     ],
     "expectedRules": []
+  },
+  {
+    "name": "district_header_south_boston",
+    "panels": [
+      "South Boston",
+      "Resident Permit Parking 6PM - 10AM Mon. to Fri."
+    ],
+    "expectedRules": [
+      {
+        "kind": {
+          "type": "permitOnly",
+          "zone": "SOUTH BOSTON"
+        },
+        "days": {
+          "days": [
+            "MON",
+            "TUE",
+            "WED",
+            "THU",
+            "FRI"
+          ]
+        },
+        "window": {
+          "start": "18:00",
+          "end": "10:00"
+        }
+      }
+    ]
+  },
+  {
+    "name": "district_header_back_bay_with_cleaning",
+    "panels": [
+      "Back Bay Permit Parking Only",
+      "Street Cleaning Every FRIDAY 8am-12noon",
+      "Tow Zone"
+    ],
+    "expectedRules": [
+      {
+        "kind": {
+          "type": "permitOnly",
+          "zone": "BACK BAY"
+        }
+      },
+      {
+        "kind": {
+          "type": "streetCleaning"
+        },
+        "days": {
+          "days": [
+            "FRI"
+          ]
+        },
+        "window": {
+          "start": "08:00",
+          "end": "12:00"
+        },
+        "towZone": true
+      }
+    ]
+  },
+  {
+    "name": "watermark_is_not_a_zone",
+    "panels": [
+      "Beacon Hill",
+      "Resident Permit Parking Only",
+      "Image ID: D2TR7B alamy www.alamy.com"
+    ],
+    "expectedRules": [
+      {
+        "kind": {
+          "type": "permitOnly",
+          "zone": "BEACON HILL"
+        }
+      }
+    ]
+  },
+  {
+    "name": "fenway_kenmore_slash_zone",
+    "panels": [
+      "FENWAY/KENMORE PERMIT PARKING ONLY"
+    ],
+    "expectedRules": [
+      {
+        "kind": {
+          "type": "permitOnly",
+          "zone": "FENWAY KENMORE"
+        }
+      }
+    ]
+  },
+  {
+    "name": "north_end_loading_limit_valet",
+    "panels": [
+      "ZONE TOL COMMERCIAL VEHICLES ONLY R 8:00am-Noon",
+      "LOADING ZONE Parking Limit 2 Noon-5:00pm Except Sunday",
+      "TOW ZONE VALET PARKING ONLY 5:00pm-12Midnight"
+    ],
+    "expectedRules": [
+      {
+        "kind": {
+          "type": "loadingZone"
+        },
+        "window": {
+          "start": "08:00",
+          "end": "12:00"
+        }
+      },
+      {
+        "kind": {
+          "type": "timeLimit",
+          "minutes": 120
+        },
+        "days": {
+          "days": [
+            "MON",
+            "TUE",
+            "WED",
+            "THU",
+            "FRI",
+            "SAT"
+          ]
+        },
+        "window": {
+          "start": "12:00",
+          "end": "17:00"
+        }
+      },
+      {
+        "kind": {
+          "type": "loadingZone"
+        },
+        "window": {
+          "start": "17:00",
+          "end": "00:00"
+        },
+        "towZone": true
+      }
+    ]
+  },
+  {
+    "name": "valet_parking_only",
+    "panels": [
+      "Valet Parking Only 4pm - Midnight",
+      "Tow Zone"
+    ],
+    "expectedRules": [
+      {
+        "kind": {
+          "type": "loadingZone"
+        },
+        "window": {
+          "start": "16:00",
+          "end": "00:00"
+        },
+        "towZone": true
+      }
+    ]
+  },
+  {
+    "name": "ocr_typos_bam_novomber",
+    "panels": [
+      "Street Cleaning 1st & 3rd Wednesday of EACH MONTH, April 1 to Novomber 30 Bam - 12noon"
+    ],
+    "expectedRules": [
+      {
+        "kind": {
+          "type": "streetCleaning"
+        },
+        "days": {
+          "nth": [
+            1,
+            3
+          ],
+          "weekday": "WED"
+        },
+        "window": {
+          "start": "08:00",
+          "end": "12:00"
+        },
+        "season": {
+          "startMonth": 4,
+          "startDay": 1,
+          "endMonth": 11,
+          "endDay": 30
+        }
+      }
+    ]
+  },
+  {
+    "name": "ocr_typo_noor",
+    "panels": [
+      "Street Cleaning 2nd & 4th WEDNESDAY 8am-12noor Tow Zone"
+    ],
+    "expectedRules": [
+      {
+        "kind": {
+          "type": "streetCleaning"
+        },
+        "days": {
+          "nth": [
+            2,
+            4
+          ],
+          "weekday": "WED"
+        },
+        "window": {
+          "start": "08:00",
+          "end": "12:00"
+        },
+        "towZone": true
+      }
+    ]
+  },
+  {
+    "name": "ocr_typo_sicker",
+    "panels": [
+      "South Boston Visitor Parking",
+      "2 Hour Limit 6pm to 10am Mon. to Fri. Except Resident Sicker"
+    ],
+    "expectedRules": [
+      {
+        "kind": {
+          "type": "timeLimit",
+          "minutes": 120
+        },
+        "days": {
+          "days": [
+            "MON",
+            "TUE",
+            "WED",
+            "THU",
+            "FRI"
+          ]
+        },
+        "window": {
+          "start": "18:00",
+          "end": "10:00"
+        },
+        "residentExempt": true
+      }
+    ]
+  },
+  {
+    "name": "temporary_notice_is_skipped",
+    "panels": [
+      "TOW ZONE CITY of BOSTON",
+      "NO STANDING PERMITTED MOVING VEHICLES ONLY time: 7:00AM TO 5:00PM Date: 08/03/23"
+    ],
+    "expectedRules": []
+  },
+  {
+    "name": "temporary_notice_date_only",
+    "panels": [
+      "TOW ZONE CITY of BOSTON",
+      "NO STANDING PERMITTED MOVING VEHICLES ONLY 7:00AM TO 6:90PM 09/03/23/50: De CU: 4936"
+    ],
+    "expectedRules": []
+  },
+  {
+    "name": "district_header_on_line_above_permit",
+    "panels": [
+      "South Boston Visitor Parking",
+      "2 Hour Limit 6pm to 10am Mon. to Fri. Except Resident Sicker South Boston",
+      "Resident Permit Parking 6pm to 10am Mon. to Fri."
+    ],
+    "expectedRules": [
+      {
+        "kind": {
+          "type": "timeLimit",
+          "minutes": 120
+        },
+        "days": {
+          "days": [
+            "MON",
+            "TUE",
+            "WED",
+            "THU",
+            "FRI"
+          ]
+        },
+        "window": {
+          "start": "18:00",
+          "end": "10:00"
+        },
+        "residentExempt": true
+      },
+      {
+        "kind": {
+          "type": "permitOnly",
+          "zone": "SOUTH BOSTON"
+        },
+        "days": {
+          "days": [
+            "MON",
+            "TUE",
+            "WED",
+            "THU",
+            "FRI"
+          ]
+        },
+        "window": {
+          "start": "18:00",
+          "end": "10:00"
+        }
+      }
+    ]
   }
 ]

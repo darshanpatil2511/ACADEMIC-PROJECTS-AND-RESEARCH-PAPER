@@ -4,17 +4,20 @@ import ImageIO
 
 /// Loads photos (JPEG, HEIC, PNG) as a CGImage plus the EXIF orientation needed to make them upright.
 public enum ImageDecoding {
+    /// The data isn't an image ImageIO can read.
     public enum DecodeError: Error, LocalizedError {
         case unreadable
 
         public var errorDescription: String? { "That file isn't a photo CurbLens can read." }
     }
 
+    /// Decodes image data (JPEG/HEIC/PNG) and returns it with its EXIF orientation.
     public static func decode(data: Data) throws -> (CGImage, CGImagePropertyOrientation) {
         guard let source = CGImageSourceCreateWithData(data as CFData, nil) else { throw DecodeError.unreadable }
         return try decode(source: source)
     }
 
+    /// Decodes an image file and returns it with its EXIF orientation.
     public static func decode(url: URL) throws -> (CGImage, CGImagePropertyOrientation) {
         guard let source = CGImageSourceCreateWithURL(url as CFURL, nil) else { throw DecodeError.unreadable }
         return try decode(source: source)

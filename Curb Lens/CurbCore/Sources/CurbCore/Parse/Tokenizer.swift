@@ -2,6 +2,7 @@ import Foundation
 
 /// One typed word of sign text.
 public struct Token: Hashable, Sendable {
+    /// What a word means to the parser.
     public enum Kind: Hashable, Sendable {
         /// Canonical sign keyword, e.g. "HOUR" for "HR".
         case keyword(String)
@@ -21,6 +22,7 @@ public struct Token: Hashable, Sendable {
         case unknown(String)
     }
 
+    /// The word's type and canonical value.
     public var kind: Kind
     /// The text as it appeared after normalization.
     public var text: String
@@ -31,6 +33,7 @@ public struct Token: Hashable, Sendable {
 
 /// Splits normalized sign text into typed tokens.
 public enum Tokenizer {
+    /// Splits normalized text into typed tokens, e.g. "2 HOUR PARKING 8AM - 6PM" -> number, keyword, keyword, time, dash, time.
     public static func tokenize(_ text: String) -> [Token] {
         guard let re = try? NSRegularExpression(pattern: #"[A-Z0-9:]+|&|-"#) else { return [] }
         let upper = text.uppercased()

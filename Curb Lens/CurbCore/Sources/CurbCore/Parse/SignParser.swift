@@ -2,6 +2,7 @@ import Foundation
 
 /// What the parser understood from a sign, and how sure it is.
 public struct ParseResult: Codable, Hashable, Sendable {
+    /// One rule per restriction found, in sign order.
     public var rules: [ParkingRule]
     /// Words that weren't used by any rule. Non-empty means "double-check the sign".
     public var unparsedTokens: [String]
@@ -29,6 +30,7 @@ public struct ParseResult: Codable, Hashable, Sendable {
 /// 4. Each segment's modifiers (time ranges, days, ordinals, season, TOW ZONE, permit zone) are
 ///    collected; every token used is marked, and the rest are reported as unparsed.
 public enum SignParser {
+    /// Parses the text of one sign (one string per panel, top to bottom) into rules, reporting what it didn't understand.
     public static func parse(panels: [String]) -> ParseResult {
         var tokens: [Token] = []
         var panelOf: [Int] = []
@@ -41,8 +43,17 @@ public enum SignParser {
             panelOf += Array(repeating: index, count: panelTokens.count)
         }
 
+        // "TIME: 7:00AM TO 5:00PM  DATE: 08/03/23": a posted temporary notice. Those aren't handled, so report
+        // no rules (the app then says to check the sign) instead of reading it as a permanent restriction.
+        // Permanent signs spell seasons with month names, so a numeric date also marks a temporary notice.
+        if tokens.contains(where: { $0.kind == .keyword("DATE") }) || panels.contains(where: Self.hasNumericDate) {
+            let countable = tokens.filter { !$0.isSeparator }.map(\.text)
+            return ParseResult(rules: [], unparsedTokens: countable, confidence: 0, normalizations: normalizations)
+        }
+
         var context = ParseContext(tokens: tokens, panelOf: panelOf)
         let heads = context.detectHeads()
+        context.signHasPermitRule = heads.contains { $0.kind == .permit }
         var rules: [ParkingRule] = []
         for segment in context.segments(for: heads) {
             rules += context.buildRules(for: segment)
@@ -58,6 +69,11 @@ public enum SignParser {
         }
         return ParseResult(rules: rules, unparsedTokens: unparsed,
                            confidence: confidence, normalizations: normalizations)
+    }
+
+    /// "08/03/23", "8/3/2023"
+    static func hasNumericDate(_ text: String) -> Bool {
+        text.range(of: #"\b\d{1,2}/\d{1,2}/\d{2,4}"#, options: .regularExpression) != nil
     }
 }
 
@@ -90,6 +106,8 @@ struct ParseContext {
     let tokens: [Token]
     let panelOf: [Int]
     private(set) var used: [Bool]
+    /// Set after head detection: when the sign has a permit rule, district names are left for it.
+    var signHasPermitRule = false
     /// Current search bounds; accessors return nil outside them.
     private var lo = 0
     private var hi = 0
@@ -198,6 +216,17 @@ struct ParseContext {
         }
         if kw(i, "DROP"), kw(i + 1, "OFF") {
             return Head(kind: .loadingZone, range: i..<(kw(i + 2, "ZONE") ? i + 3 : i + 2))
+        }
+        // "VALET PARKING ONLY 4PM - MIDNIGHT": reserved for valets, so no parking for a regular car.
+        if kw(i, "VALET") {
+            var j = i + 1
+            while kw(j, "PARKING", "ONLY", "ZONE") { j += 1 }
+            return Head(kind: .loadingZone, range: i..<j)
+        }
+        // "PARKING LIMIT 2 NOON-5PM": a "2 HOUR PARKING LIMIT" sign whose big stacked "2" OCR reads last
+        // and whose small "HOUR" it misses. Only 1-4, the hour limits Boston uses; a missing digit is not guessed.
+        if kw(i, "PARKING"), kw(i + 1, "LIMIT"), let n = number(i + 2), (1...4).contains(n) {
+            return Head(kind: .timeLimit(minutes: n * 60), range: i..<(kw(i + 3, "HOUR") ? i + 4 : i + 3))
         }
         // "RESIDENT PERMIT PARKING ONLY", "PERMIT PARKING ONLY", "RESIDENT PARKING".
         // Not "EXCEPT RESIDENT STICKER" — that's an exemption, handled in buildRules.
@@ -323,7 +352,13 @@ struct ParseContext {
         let except = takeExceptDays()
         let explicit = takeDayLists()
         takeKeyword("DAILY")
-        let zone = head == .permit ? takePermitZone(after: segment.heads) : nil
+        let zone: String?
+        if head == .permit {
+            zone = takeDistrict(lookBehind: 3) ?? takePermitZone(after: segment.heads)
+        } else {
+            if !signHasPermitRule { _ = takeDistrict(lookBehind: 0) }
+            zone = nil
+        }
         takeFillers()
 
         let days: DayRule
@@ -551,7 +586,23 @@ struct ParseContext {
         for i in lo..<hi where kw(i, word) { mark(i..<i + 1) }
     }
 
-    // "RESIDENT PERMIT PARKING ONLY / BACK BAY" -> zone "BACK BAY".
+    // "SOUTH BOSTON / RESIDENT PERMIT PARKING", "FENWAY/KENMORE PERMIT PARKING ONLY": a Boston district
+    // name in the segment, or up to `lookBehind` tokens before it (OCR often glues the header onto the end
+    // of the line above). It's the zone of a permit rule; on other signs it's just the header.
+    private mutating func takeDistrict(lookBehind: Int) -> String? {
+        for i in max(0, lo - lookBehind)..<hi {
+            for words in Vocabulary.districts where (0..<words.count).allSatisfy({
+                let j = i + $0
+                return j < hi && !used[j] && tokens[j].text == words[$0]
+            }) {
+                mark(i..<i + words.count)
+                return words.joined(separator: " ")
+            }
+        }
+        return nil
+    }
+
+    // "RESIDENT PERMIT PARKING ONLY / BACK BAY" -> zone "BACK BAY" (fallback for names not in the district list).
     private mutating func takePermitZone(after heads: [Head]) -> String? {
         guard let permitHead = heads.first(where: { $0.kind == .permit }) else { return nil }
         var words: [String] = []

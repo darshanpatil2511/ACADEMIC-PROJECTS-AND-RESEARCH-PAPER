@@ -13,6 +13,7 @@ import Foundation
 
 /// Ground truth for one dataset photo.
 public struct EvalLabel: Codable, Hashable, Sendable {
+    /// Whether a photo may be tuned on.
     public enum Split: String, Codable, Sendable, CaseIterable {
         /// Used while improving the parser.
         case dev
@@ -20,12 +21,17 @@ public struct EvalLabel: Codable, Hashable, Sendable {
         case test
     }
 
+    /// Photo path relative to the dataset folder.
     public var image: String
+    /// dev or test.
     public var split: Split
+    /// Tags such as "angle" or "dusk"; results are broken down by them.
     public var conditions: [String]
     /// What the sign says, panels separated by "|".
     public var transcript: String
+    /// The rules a perfect reader would produce.
     public var rules: [ParkingRule]
+    /// Times with the verdict a driver should get.
     public var checks: [EvalCheck]
 
     public init(image: String, split: Split, conditions: [String], transcript: String, rules: [ParkingRule],
@@ -60,6 +66,7 @@ public struct EvalLabel: Codable, Hashable, Sendable {
 public struct EvalCheck: Codable, Hashable, Sendable {
     /// Boston wall-clock time, "yyyy-MM-dd'T'HH:mm".
     public var at: String
+    /// The verdict category expected at `at`.
     public var expect: VerdictKind
 
     public init(at: String, expect: VerdictKind) {
@@ -67,11 +74,13 @@ public struct EvalCheck: Codable, Hashable, Sendable {
         self.expect = expect
     }
 
+    /// A check time that isn't yyyy-MM-dd'T'HH:mm.
     public struct BadTime: Error, CustomStringConvertible {
         public var text: String
         public var description: String { "Bad check time \"\(text)\": expected yyyy-MM-dd'T'HH:mm" }
     }
 
+    /// The check time as a Date in `calendar`'s time zone.
     public func date(calendar: Calendar) throws -> Date {
         let parts = at.split(whereSeparator: { "-T:".contains($0) }).compactMap { Int($0) }
         guard parts.count == 5,

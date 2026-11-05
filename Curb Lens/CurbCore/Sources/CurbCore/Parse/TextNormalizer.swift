@@ -2,6 +2,7 @@ import Foundation
 
 /// Normalized sign text plus a log of every change made to it.
 public struct NormalizedText: Hashable, Sendable {
+    /// Uppercased, OCR-corrected text with ranges spelled as " - ".
     public let text: String
     /// Each entry reads "before→after", e.g. "N0→NO" or "NOON→12PM".
     public let substitutions: [String]
@@ -11,6 +12,7 @@ public struct NormalizedText: Hashable, Sendable {
 ///
 /// Example: "N0 PARKING 8 a.m.-l2 NOON" -> "NO PARKING 8AM - 12PM".
 public enum TextNormalizer {
+    /// Cleans one panel of raw OCR text and logs every fix it made.
     public static func normalize(_ raw: String) -> NormalizedText {
         // "TOW ZONÉ" -> "TOW ZONE": fold accents OCR sometimes adds.
         let folded = raw.folding(options: [.diacriticInsensitive, .widthInsensitive], locale: Locale(identifier: "en_US_POSIX"))
@@ -25,6 +27,8 @@ public enum TextNormalizer {
         r.replace("['\u{2019}]", with: "", record: false)
         r.replace(#"[^A-Z0-9:&\-\s]"#, with: " ", record: false)
 
+        // "TIME:", "DATE:" -> "TIME", "DATE": only a colon between digits ("7:30AM") is part of a token.
+        r.replace(#"(?<![0-9OILSB]):|:(?![0-9OILSB])"#, with: " ", record: false)
         // OCR character confusions, one token at a time.
         r.transformMatches(#"[A-Z0-9:]+"#, fixToken)
 
@@ -38,8 +42,8 @@ public enum TextNormalizer {
         r.replace(#"\bANYTIME\b"#, with: "ANY TIME")
         // "8AM TO 6PM", "MON THRU SAT" -> ranges with a hyphen.
         r.replace(#"\b(?:TO|THRU|THROUGH|TIL|TILL|UNTIL)\b"#, with: "-")
-        // "12 NOON", "NOON" -> "12PM"; "12 MIDNIGHT", "MIDNIGHT" -> "12AM".
-        r.replace(#"\b(?:12\s*)?NOON\b"#, with: "12PM")
+        // "12 NOON", "NOON", and the OCR misreads "12NOOR" / "NOOM" -> "12PM"; "12 MIDNIGHT", "MIDNIGHT" -> "12AM".
+        r.replace(#"\b(?:12\s*)?NOO[NRM]\b"#, with: "12PM")
         r.replace(#"\b(?:12\s*)?MIDNIGHT\b"#, with: "12AM")
         // "8 A M", "8 AM" (and "8 A.M." after punctuation removal) -> "8AM".
         r.replace(#"(\d)\s*([AP])\s*M\b"#, with: "$1$2M")
@@ -65,7 +69,30 @@ public enum TextNormalizer {
             let candidate = String(token.map { letterLookalikes[$0] ?? $0 })
             if Vocabulary.all.contains(candidate) { return candidate }
         }
+        if let corrected = fixMeridiemLookalike(token) { return corrected }
+        if let corrected = fixOneLetterOff(token) { return corrected }
         return fixNumericToken(token)
+    }
+
+    /// "BAM" -> "8AM", "IOAM" -> "10AM", "SPM" -> "5PM": an hour made only of digit lookalikes before AM/PM.
+    private static func fixMeridiemLookalike(_ token: String) -> String? {
+        guard token.count <= 4, token.hasSuffix("AM") || token.hasSuffix("PM") else { return nil }
+        let core = token.dropLast(2)
+        guard !core.isEmpty, core.allSatisfy({ digitLookalikes[$0] != nil || $0.isNumber }),
+              !core.allSatisfy(\.isNumber) else { return nil }
+        let hour = String(core.map { digitLookalikes[$0] ?? $0 })
+        guard let value = Int(hour), (1...12).contains(value) else { return nil }
+        return hour + token.suffix(2)
+    }
+
+    /// "NOVOMBER" -> "NOVEMBER", "SICKER" -> "STICKER": a word of 6+ letters exactly one edit away from a
+    /// single long sign word. Short words are left alone ("NORTH" is a district, not "MONTH").
+    private static func fixOneLetterOff(_ token: String) -> String? {
+        guard token.count >= 6, token.allSatisfy(\.isLetter), !Vocabulary.all.contains(token) else { return nil }
+        let matches = Vocabulary.fuzzyTargets.filter {
+            abs($0.count - token.count) <= 1 && EvalMetrics.editDistance($0, token) == 1
+        }
+        return matches.count == 1 ? matches[0] : nil
     }
 
     /// Fixes letters inside time/number/ordinal tokens. Requires at least one real digit,

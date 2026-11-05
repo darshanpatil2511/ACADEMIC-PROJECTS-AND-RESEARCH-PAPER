@@ -8,13 +8,16 @@ import Vision
 
 /// Options for one read. Defaults are the high-accuracy configuration.
 public struct ReaderOptions: Sendable, Hashable {
+    /// Vision text-recognition level: accurate for stills, fast for cheap previews.
     public enum Level: String, Sendable, Hashable, CaseIterable {
         case accurate, fast
     }
 
+    /// Vision recognition level.
     public var level: Level
     /// Detect the sign rectangle and perspective-correct it before OCR.
     public var cropToSign: Bool
+    /// Let Vision correct words toward a language model (plus `customWords`).
     public var languageCorrection: Bool
     /// Extra vocabulary for Vision's language correction (only used when `languageCorrection` is on).
     public var customWords: [String]
@@ -45,17 +48,25 @@ public struct ReaderOptions: Sendable, Hashable {
     /// Below this fraction of the frame, a detected sign may be one of several on the pole.
     public static let fullImageCheckArea: CGFloat = 0.6
 
+    /// Defaults: accurate OCR, crop to the sign, language correction, full-image fallback.
     public static let accurate = ReaderOptions()
+    /// The defaults with Vision's fast recognizer.
     public static let fast = ReaderOptions(level: .fast)
 }
 
 /// Milliseconds spent in each pipeline stage.
 public struct StageTimings: Codable, Hashable, Sendable {
+    /// Rectangle detection.
     public var detect: Double = 0
+    /// Perspective correction of the detected sign.
     public var correct: Double = 0
+    /// Text recognition (all passes).
     public var ocr: Double = 0
+    /// Grouping lines into panels.
     public var group: Double = 0
+    /// Normalizing, tokenizing and parsing.
     public var parse: Double = 0
+    /// Wall-clock time for the whole read.
     public var total: Double = 0
 
     public init() {}
@@ -78,8 +89,11 @@ public struct StageTimings: Codable, Hashable, Sendable {
 public struct SignReading: @unchecked Sendable {
     /// OCR lines; boxes are normalized (bottom-left origin) in `ocrImage`.
     public var lines: [RecognizedLine]
+    /// Panel texts, top to bottom, as passed to the parser.
     public var panels: [String]
+    /// What the parser understood.
     public var parse: ParseResult
+    /// Milliseconds per stage.
     public var timings: StageTimings
     /// The detected sign, normalized in the upright input image; nil when no rectangle was found or cropping was off.
     public var signQuad: Quad?
@@ -96,6 +110,7 @@ public struct SignReading: @unchecked Sendable {
     }
 }
 
+/// Errors `SignReader` throws besides Vision's own.
 public enum SignReaderError: Error, LocalizedError {
     case renderFailed
 

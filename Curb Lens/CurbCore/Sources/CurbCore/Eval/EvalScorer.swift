@@ -6,10 +6,13 @@ public struct ReadingSummary: Sendable {
     public var detected: Bool
     /// The whole image read better than the sign crop.
     public var usedFallback: Bool
+    /// Panel texts the reader produced.
     public var panels: [String]
+    /// Rules the parser produced.
     public var rules: [ParkingRule]
     /// nil when the read failed.
     public var timings: StageTimings?
+    /// Why the read failed, if it did.
     public var error: String?
 
     public init(detected: Bool, usedFallback: Bool = false, panels: [String], rules: [ParkingRule],
@@ -54,6 +57,7 @@ public struct ImageScore: Codable, Hashable, Sendable {
     public var gotRules: [String]
     public var gotTranscript: String
     public var timings: StageTimings?
+    /// Why the read failed, if it did.
     public var error: String?
 }
 

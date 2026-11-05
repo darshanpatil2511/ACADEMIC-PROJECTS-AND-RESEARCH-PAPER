@@ -49,6 +49,19 @@ struct TextNormalizerTests {
         #expect(norm("OWNER'S EXPENSE") == "OWNERS EXPENSE")
     }
 
+    @Test func fixesLongWordsOneLetterOff() {
+        #expect(norm("APRIL 1 TO NOVOMBER 30") == "APRIL 1 - NOVEMBER 30")
+        #expect(norm("EXCEPT RESIDENT SICKER") == "EXCEPT RESIDENT STICKER")
+        // Not sign words, or more than one letter off: left alone.
+        #expect(norm("BOSTON PUBLIC OFFICE") == "BOSTON PUBLIC OFFICE")
+        #expect(norm("NORTH END") == "NORTH END")
+    }
+
+    @Test func fixesMeridiemLookalikesAndNoonTypos() {
+        #expect(norm("BAM - 12NOOR") == "8AM - 12PM")
+        #expect(norm("IOAM - SPM") == "10AM - 5PM")
+    }
+
     @Test func cleanTextHasNoOCRFixes() {
         let result = TextNormalizer.normalize("NO PARKING 8AM - 12PM")
         #expect(result.substitutions.isEmpty)

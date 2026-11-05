@@ -2,7 +2,9 @@ import CoreGraphics
 
 /// One line of text found by OCR.
 public struct RecognizedLine: Hashable, Sendable {
+    /// The recognized text of the line.
     public var text: String
+    /// Vision's confidence for the line, 0...1.
     public var confidence: Float
     /// Normalized, bottom-left origin, relative to the image OCR ran on.
     public var box: CGRect
@@ -24,6 +26,7 @@ public enum PanelGrouper {
     /// A gap bigger than this multiple of the median row height starts a new panel.
     public static let gapFactor: CGFloat = 1.2
 
+    /// Groups OCR lines into sign panels, top to bottom: a new panel starts at a large vertical gap or a line beginning with a panel keyword (NO, TOW, STREET, RESIDENT, LOADING, SNOW, "<n> HOUR").
     public static func panels(from lines: [RecognizedLine]) -> [String] {
         let rows = self.rows(from: lines)
         guard !rows.isEmpty else { return [] }

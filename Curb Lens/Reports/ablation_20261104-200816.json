@@ -1,0 +1,2794 @@
+[
+  {
+    "byCondition" : {
+      "day" : {
+        "checksPassed" : 3,
+        "checksTotal" : 3,
+        "exactMatches" : 1,
+        "extraRulesPerImage" : 0,
+        "fieldAccuracy" : {
+          "days" : 1,
+          "kind" : 1,
+          "season" : 1,
+          "towZone" : 1,
+          "window" : 1
+        },
+        "fullImageFallbacks" : 0,
+        "images" : 1,
+        "latency" : {
+          "correct" : {
+            "count" : 1,
+            "mean" : 0,
+            "p50" : 0,
+            "p95" : 0
+          },
+          "detect" : {
+            "count" : 1,
+            "mean" : 6.54025,
+            "p50" : 6.54025,
+            "p95" : 6.54025
+          },
+          "group" : {
+            "count" : 1,
+            "mean" : 1.495625,
+            "p50" : 1.495625,
+            "p95" : 1.495625
+          },
+          "ocr" : {
+            "count" : 1,
+            "mean" : 58.149667,
+            "p50" : 58.149667,
+            "p95" : 58.149667
+          },
+          "parse" : {
+            "count" : 1,
+            "mean" : 1.586833,
+            "p50" : 1.586833,
+            "p95" : 1.586833
+          },
+          "total" : {
+            "count" : 1,
+            "mean" : 67.77675,
+            "p50" : 67.77675,
+            "p95" : 67.77675
+          }
+        },
+        "meanCER" : 0.23076923076923078,
+        "readErrors" : 0,
+        "ruleExactMatchRate" : 1,
+        "signDetectedRate" : 0,
+        "signsDetected" : 0,
+        "verdictAccuracy" : 1
+      },
+      "distant" : {
+        "checksPassed" : 3,
+        "checksTotal" : 3,
+        "exactMatches" : 0,
+        "extraRulesPerImage" : 0,
+        "fieldAccuracy" : {
+          "days" : 1,
+          "kind" : 1,
+          "season" : 1,
+          "towZone" : 0.6666666666666666,
+          "window" : 1
+        },
+        "fullImageFallbacks" : 1,
+        "images" : 1,
+        "latency" : {
+          "correct" : {
+            "count" : 1,
+            "mean" : 1.483625,
+            "p50" : 1.483625,
+            "p95" : 1.483625
+          },
+          "detect" : {
+            "count" : 1,
+            "mean" : 6.697417,
+            "p50" : 6.697417,
+            "p95" : 6.697417
+          },
+          "group" : {
+            "count" : 1,
+            "mean" : 4.050541,
+            "p50" : 4.050541,
+            "p95" : 4.050541
+          },
+          "ocr" : {
+            "count" : 1,
+            "mean" : 136.03875,
+            "p50" : 136.03875,
+            "p95" : 136.03875
+          },
+          "parse" : {
+            "count" : 1,
+            "mean" : 5.175416,
+            "p50" : 5.175416,
+            "p95" : 5.175416
+          },
+          "total" : {
+            "count" : 1,
+            "mean" : 153.4725,
+            "p50" : 153.4725,
+            "p95" : 153.4725
+          }
+        },
+        "meanCER" : 0.1271186440677966,
+        "readErrors" : 0,
+        "ruleExactMatchRate" : 0,
+        "signDetectedRate" : 1,
+        "signsDetected" : 1,
+        "verdictAccuracy" : 1
+      },
+      "dusk" : {
+        "checksPassed" : 7,
+        "checksTotal" : 7,
+        "exactMatches" : 0,
+        "extraRulesPerImage" : 0,
+        "fieldAccuracy" : {
+          "days" : 0.8333333333333334,
+          "kind" : 0.8333333333333334,
+          "season" : 0.8333333333333334,
+          "towZone" : 0.6666666666666666,
+          "window" : 0.6666666666666666
+        },
+        "fullImageFallbacks" : 2,
+        "images" : 2,
+        "latency" : {
+          "correct" : {
+            "count" : 2,
+            "mean" : 2.040375,
+            "p50" : 2.040375,
+            "p95" : 2.54145
+          },
+          "detect" : {
+            "count" : 2,
+            "mean" : 6.5907915,
+            "p50" : 6.5907915,
+            "p95" : 6.68675445
+          },
+          "group" : {
+            "count" : 2,
+            "mean" : 4.4979165000000005,
+            "p50" : 4.4979165000000005,
+            "p95" : 4.9005544500000005
+          },
+          "ocr" : {
+            "count" : 2,
+            "mean" : 119.3851875,
+            "p50" : 119.3851875,
+            "p95" : 134.37339375
+          },
+          "parse" : {
+            "count" : 2,
+            "mean" : 4.7216455,
+            "p50" : 4.7216455,
+            "p95" : 5.13003895
+          },
+          "total" : {
+            "count" : 2,
+            "mean" : 137.25775,
+            "p50" : 137.25775,
+            "p95" : 151.851025
+          }
+        },
+        "meanCER" : 0.1948957275638522,
+        "readErrors" : 0,
+        "ruleExactMatchRate" : 0,
+        "signDetectedRate" : 1,
+        "signsDetected" : 2,
+        "verdictAccuracy" : 1
+      },
+      "glare" : {
+        "checksPassed" : 0,
+        "checksTotal" : 2,
+        "exactMatches" : 0,
+        "extraRulesPerImage" : 0,
+        "fieldAccuracy" : {
+          "days" : 0,
+          "kind" : 0,
+          "season" : 0,
+          "towZone" : 0,
+          "window" : 0
+        },
+        "fullImageFallbacks" : 0,
+        "images" : 1,
+        "latency" : {
+          "correct" : {
+            "count" : 1,
+            "mean" : 3.781375,
+            "p50" : 3.781375,
+            "p95" : 3.781375
+          },
+          "detect" : {
+            "count" : 1,
+            "mean" : 6.593208,
+            "p50" : 6.593208,
+            "p95" : 6.593208
+          },
+          "group" : {
+            "count" : 1,
+            "mean" : 2.782584,
+            "p50" : 2.782584,
+            "p95" : 2.782584
+          },
+          "ocr" : {
+            "count" : 1,
+            "mean" : 100.664666,
+            "p50" : 100.664666,
+            "p95" : 100.664666
+          },
+          "parse" : {
+            "count" : 1,
+            "mean" : 2.5735,
+            "p50" : 2.5735,
+            "p95" : 2.5735
+          },
+          "total" : {
+            "count" : 1,
+            "mean" : 116.404208,
+            "p50" : 116.404208,
+            "p95" : 116.404208
+          }
+        },
+        "meanCER" : 0.04878048780487805,
+        "readErrors" : 0,
+        "ruleExactMatchRate" : 0,
+        "signDetectedRate" : 1,
+        "signsDetected" : 1,
+        "verdictAccuracy" : 0
+      },
+      "low-res" : {
+        "checksPassed" : 1,
+        "checksTotal" : 1,
+        "exactMatches" : 1,
+        "extraRulesPerImage" : 0,
+        "fieldAccuracy" : {
+          "days" : 1,
+          "kind" : 1,
+          "season" : 1,
+          "towZone" : 1,
+          "window" : 1
+        },
+        "fullImageFallbacks" : 1,
+        "images" : 1,
+        "latency" : {
+          "correct" : {
+            "count" : 1,
+            "mean" : 2.736667,
+            "p50" : 2.736667,
+            "p95" : 2.736667
+          },
+          "detect" : {
+            "count" : 1,
+            "mean" : 9.435167,
+            "p50" : 9.435167,
+            "p95" : 9.435167
+          },
+          "group" : {
+            "count" : 1,
+            "mean" : 0.5967910000000001,
+            "p50" : 0.5967910000000001,
+            "p95" : 0.5967910000000001
+          },
+          "ocr" : {
+            "count" : 1,
+            "mean" : 42.593292,
+            "p50" : 42.593292,
+            "p95" : 42.593292
+          },
+          "parse" : {
+            "count" : 1,
+            "mean" : 0.474416,
+            "p50" : 0.474416,
+            "p95" : 0.474416
+          },
+          "total" : {
+            "count" : 1,
+            "mean" : 55.846875,
+            "p50" : 55.846875,
+            "p95" : 55.846875
+          }
+        },
+        "meanCER" : 0,
+        "readErrors" : 0,
+        "ruleExactMatchRate" : 1,
+        "signDetectedRate" : 1,
+        "signsDetected" : 1,
+        "verdictAccuracy" : 1
+      },
+      "multi-sign" : {
+        "checksPassed" : 7,
+        "checksTotal" : 7,
+        "exactMatches" : 0,
+        "extraRulesPerImage" : 0,
+        "fieldAccuracy" : {
+          "days" : 0.8333333333333334,
+          "kind" : 0.8333333333333334,
+          "season" : 0.8333333333333334,
+          "towZone" : 0.6666666666666666,
+          "window" : 0.6666666666666666
+        },
+        "fullImageFallbacks" : 2,
+        "images" : 2,
+        "latency" : {
+          "correct" : {
+            "count" : 2,
+            "mean" : 2.040375,
+            "p50" : 2.040375,
+            "p95" : 2.54145
+          },
+          "detect" : {
+            "count" : 2,
+            "mean" : 6.5907915,
+            "p50" : 6.5907915,
+            "p95" : 6.68675445
+          },
+          "group" : {
+            "count" : 2,
+            "mean" : 4.4979165000000005,
+            "p50" : 4.4979165000000005,
+            "p95" : 4.9005544500000005
+          },
+          "ocr" : {
+            "count" : 2,
+            "mean" : 119.3851875,
+            "p50" : 119.3851875,
+            "p95" : 134.37339375
+          },
+          "parse" : {
+            "count" : 2,
+            "mean" : 4.7216455,
+            "p50" : 4.7216455,
+            "p95" : 5.13003895
+          },
+          "total" : {
+            "count" : 2,
+            "mean" : 137.25775,
+            "p50" : 137.25775,
+            "p95" : 151.851025
+          }
+        },
+        "meanCER" : 0.1948957275638522,
+        "readErrors" : 0,
+        "ruleExactMatchRate" : 0,
+        "signDetectedRate" : 1,
+        "signsDetected" : 2,
+        "verdictAccuracy" : 1
+      },
+      "straight" : {
+        "checksPassed" : 3,
+        "checksTotal" : 3,
+        "exactMatches" : 1,
+        "extraRulesPerImage" : 0,
+        "fieldAccuracy" : {
+          "days" : 1,
+          "kind" : 1,
+          "season" : 1,
+          "towZone" : 1,
+          "window" : 1
+        },
+        "fullImageFallbacks" : 0,
+        "images" : 1,
+        "latency" : {
+          "correct" : {
+            "count" : 1,
+            "mean" : 0,
+            "p50" : 0,
+            "p95" : 0
+          },
+          "detect" : {
+            "count" : 1,
+            "mean" : 6.54025,
+            "p50" : 6.54025,
+            "p95" : 6.54025
+          },
+          "group" : {
+            "count" : 1,
+            "mean" : 1.495625,
+            "p50" : 1.495625,
+            "p95" : 1.495625
+          },
+          "ocr" : {
+            "count" : 1,
+            "mean" : 58.149667,
+            "p50" : 58.149667,
+            "p95" : 58.149667
+          },
+          "parse" : {
+            "count" : 1,
+            "mean" : 1.586833,
+            "p50" : 1.586833,
+            "p95" : 1.586833
+          },
+          "total" : {
+            "count" : 1,
+            "mean" : 67.77675,
+            "p50" : 67.77675,
+            "p95" : 67.77675
+          }
+        },
+        "meanCER" : 0.23076923076923078,
+        "readErrors" : 0,
+        "ruleExactMatchRate" : 1,
+        "signDetectedRate" : 0,
+        "signsDetected" : 0,
+        "verdictAccuracy" : 1
+      }
+    },
+    "config" : "baseline (accurate + crop + lang-correction)",
+    "generatedAt" : "2026-11-04 20:08 EST",
+    "images" : [
+      {
+        "cer" : 0.23076923076923078,
+        "checksPassed" : 3,
+        "checksTotal" : 3,
+        "conditions" : [
+          "day",
+          "straight"
+        ],
+        "detected" : false,
+        "exactMatch" : true,
+        "expectedRuleCount" : 1,
+        "expectedRules" : [
+          "Loading zone 7:00 AM–7:00 PM Mon–Sat (tow zone)"
+        ],
+        "extraRules" : 0,
+        "failedChecks" : [
+
+        ],
+        "fieldHits" : {
+          "days" : 1,
+          "kind" : 1,
+          "season" : 1,
+          "towZone" : 1,
+          "window" : 1
+        },
+        "gotRuleCount" : 1,
+        "gotRules" : [
+          "Loading zone 7:00 AM–7:00 PM Mon–Sat (tow zone)"
+        ],
+        "gotTranscript" : "R Except Commercial Vehicles 7am-7pm | 30 Minute Limit | Except Sun. | Tow Zone",
+        "image" : "images\/commercial_vehicles_tow_zone.jpeg",
+        "split" : "dev",
+        "timings" : {
+          "correct" : 0,
+          "detect" : 6.54025,
+          "group" : 1.495625,
+          "ocr" : 58.149667,
+          "parse" : 1.586833,
+          "total" : 67.77675
+        },
+        "usedFallback" : false
+      },
+      {
+        "cer" : 0.2626728110599078,
+        "checksPassed" : 4,
+        "checksTotal" : 4,
+        "conditions" : [
+          "dusk",
+          "multi-sign"
+        ],
+        "detected" : true,
+        "exactMatch" : false,
+        "expectedRuleCount" : 3,
+        "expectedRules" : [
+          "2-hour parking 7:00 AM–4:00 PM Mon–Sat",
+          "Loading zone 4:00 PM–2:00 AM (tow zone)",
+          "2-hour parking 7:00 AM–10:00 PM Mon–Sat"
+        ],
+        "extraRules" : 0,
+        "failedChecks" : [
+
+        ],
+        "fieldHits" : {
+          "days" : 2,
+          "kind" : 2,
+          "season" : 2,
+          "towZone" : 2,
+          "window" : 1
+        },
+        "gotRuleCount" : 2,
+        "gotRules" : [
+          "Loading zone 4:00 PM–2:00 AM (tow zone)",
+          "2-hour parking 7:00 AM–10:00 PM Mon–Sat"
+        ],
+        "gotTranscript" : "HOUR PARKING METER LIMIT 7am - 4pm Except Sunday MULTI-SPACE PAY METER TO PARK | TOW ZONE Pick Up\/Drop Off 4pm - 2am EN PICOP OFF PICK UP \/ ZONE 2 PARKING HOUR METER LIMIT 7am - 10pm Except Sunday PAY MULTI-SPACE METER TO PARK",
+        "image" : "images\/meter_pickup_dropoff_pole.jpeg",
+        "split" : "dev",
+        "timings" : {
+          "correct" : 2.597125,
+          "detect" : 6.484166,
+          "group" : 4.945292,
+          "ocr" : 102.73162500000001,
+          "parse" : 4.267875,
+          "total" : 121.043
+        },
+        "usedFallback" : true
+      },
+      {
+        "cer" : 0,
+        "checksPassed" : 1,
+        "checksTotal" : 1,
+        "conditions" : [
+          "low-res"
+        ],
+        "detected" : true,
+        "exactMatch" : true,
+        "expectedRuleCount" : 1,
+        "expectedRules" : [
+          "Resident permit only any time"
+        ],
+        "extraRules" : 0,
+        "failedChecks" : [
+
+        ],
+        "fieldHits" : {
+          "days" : 1,
+          "kind" : 1,
+          "season" : 1,
+          "towZone" : 1,
+          "window" : 1
+        },
+        "gotRuleCount" : 1,
+        "gotRules" : [
+          "Resident permit only any time"
+        ],
+        "gotTranscript" : "Resident Permit Parking Only",
+        "image" : "images\/resident_permit_only.jpeg",
+        "split" : "dev",
+        "timings" : {
+          "correct" : 2.736667,
+          "detect" : 9.435167,
+          "group" : 0.5967910000000001,
+          "ocr" : 42.593292,
+          "parse" : 0.474416,
+          "total" : 55.846875
+        },
+        "usedFallback" : true
+      },
+      {
+        "cer" : 0.1271186440677966,
+        "checksPassed" : 3,
+        "checksTotal" : 3,
+        "conditions" : [
+          "dusk",
+          "distant",
+          "multi-sign"
+        ],
+        "detected" : true,
+        "exactMatch" : false,
+        "expectedRuleCount" : 3,
+        "expectedRules" : [
+          "2-hour parking 8:00 AM–6:00 PM Mon–Fri, residents exempt",
+          "Street cleaning 12:01 AM–7:00 AM Tue (tow zone)",
+          "Snow emergency route any time (tow zone)"
+        ],
+        "extraRules" : 0,
+        "failedChecks" : [
+
+        ],
+        "fieldHits" : {
+          "days" : 3,
+          "kind" : 3,
+          "season" : 3,
+          "towZone" : 2,
+          "window" : 3
+        },
+        "gotRuleCount" : 3,
+        "gotRules" : [
+          "2-hour parking 8:00 AM–6:00 PM Mon–Fri, residents exempt",
+          "Street cleaning 12:01 AM–7:00 AM Tue (tow zone)",
+          "Snow emergency route any time"
+        ],
+        "gotTranscript" : "South End Parking | 2 Hour Limit Mon-Fri 8am-6pm Except Resident Sticker | TOW LONE | STREET CLEANING 12:01am - 7am TUESDAY DURING | SNOW EMERGENCY",
+        "image" : "images\/south_end_2hr_street_cleaning_snow.jpeg",
+        "split" : "dev",
+        "timings" : {
+          "correct" : 1.483625,
+          "detect" : 6.697417,
+          "group" : 4.050541,
+          "ocr" : 136.03875,
+          "parse" : 5.175416,
+          "total" : 153.4725
+        },
+        "usedFallback" : true
+      },
+      {
+        "cer" : 0.04878048780487805,
+        "checksPassed" : 0,
+        "checksTotal" : 2,
+        "conditions" : [
+          "glare"
+        ],
+        "detected" : true,
+        "exactMatch" : false,
+        "expectedRuleCount" : 1,
+        "expectedRules" : [
+          "12-hour parking 8:00 AM–6:00 PM Mon–Sat"
+        ],
+        "extraRules" : 0,
+        "failedChecks" : [
+          "2026-11-04T10:00: expected canPark, got unreadable",
+          "2026-11-08T10:00: expected canPark, got unreadable"
+        ],
+        "fieldHits" : {
+          "days" : 0,
+          "kind" : 0,
+          "season" : 0,
+          "towZone" : 0,
+          "window" : 0
+        },
+        "gotRuleCount" : 0,
+        "gotRules" : [
+
+        ],
+        "gotTranscript" : "12 PARKING 8AM TO 6PM EXCEPT SUNDAYS & HOLIDAYS",
+        "image" : "images\/two_hr_except_sundays_glare.jpeg",
+        "split" : "dev",
+        "timings" : {
+          "correct" : 3.781375,
+          "detect" : 6.593208,
+          "group" : 2.782584,
+          "ocr" : 100.664666,
+          "parse" : 2.5735,
+          "total" : 116.404208
+        },
+        "usedFallback" : false
+      }
+    ],
+    "overall" : {
+      "checksPassed" : 11,
+      "checksTotal" : 13,
+      "exactMatches" : 2,
+      "extraRulesPerImage" : 0,
+      "fieldAccuracy" : {
+        "days" : 0.7777777777777778,
+        "kind" : 0.7777777777777778,
+        "season" : 0.7777777777777778,
+        "towZone" : 0.6666666666666666,
+        "window" : 0.6666666666666666
+      },
+      "fullImageFallbacks" : 3,
+      "images" : 5,
+      "latency" : {
+        "correct" : {
+          "count" : 5,
+          "mean" : 2.1197584000000003,
+          "p50" : 2.597125,
+          "p95" : 3.5724334
+        },
+        "detect" : {
+          "count" : 5,
+          "mean" : 7.1500416,
+          "p50" : 6.593208,
+          "p95" : 8.887616999999999
+        },
+        "group" : {
+          "count" : 5,
+          "mean" : 2.7741666,
+          "p50" : 2.782584,
+          "p95" : 4.7663418
+        },
+        "ocr" : {
+          "count" : 5,
+          "mean" : 88.0356,
+          "p50" : 100.664666,
+          "p95" : 129.37732499999998
+        },
+        "parse" : {
+          "count" : 5,
+          "mean" : 2.815608,
+          "p50" : 2.5735,
+          "p95" : 4.9939078
+        },
+        "total" : {
+          "count" : 5,
+          "mean" : 102.90866660000002,
+          "p50" : 116.404208,
+          "p95" : 146.98659999999998
+        }
+      },
+      "meanCER" : 0.13386823474036266,
+      "readErrors" : 0,
+      "ruleExactMatchRate" : 0.4,
+      "signDetectedRate" : 0.8,
+      "signsDetected" : 4,
+      "verdictAccuracy" : 0.8461538461538461
+    },
+    "split" : "dev"
+  },
+  {
+    "byCondition" : {
+      "day" : {
+        "checksPassed" : 3,
+        "checksTotal" : 3,
+        "exactMatches" : 1,
+        "extraRulesPerImage" : 0,
+        "fieldAccuracy" : {
+          "days" : 1,
+          "kind" : 1,
+          "season" : 1,
+          "towZone" : 1,
+          "window" : 1
+        },
+        "fullImageFallbacks" : 0,
+        "images" : 1,
+        "latency" : {
+          "correct" : {
+            "count" : 1,
+            "mean" : 0,
+            "p50" : 0,
+            "p95" : 0
+          },
+          "detect" : {
+            "count" : 1,
+            "mean" : 0,
+            "p50" : 0,
+            "p95" : 0
+          },
+          "group" : {
+            "count" : 1,
+            "mean" : 1.384,
+            "p50" : 1.384,
+            "p95" : 1.384
+          },
+          "ocr" : {
+            "count" : 1,
+            "mean" : 53.20775,
+            "p50" : 53.20775,
+            "p95" : 53.20775
+          },
+          "parse" : {
+            "count" : 1,
+            "mean" : 1.466917,
+            "p50" : 1.466917,
+            "p95" : 1.466917
+          },
+          "total" : {
+            "count" : 1,
+            "mean" : 56.062208,
+            "p50" : 56.062208,
+            "p95" : 56.062208
+          }
+        },
+        "meanCER" : 0.23076923076923078,
+        "readErrors" : 0,
+        "ruleExactMatchRate" : 1,
+        "signDetectedRate" : 0,
+        "signsDetected" : 0,
+        "verdictAccuracy" : 1
+      },
+      "distant" : {
+        "checksPassed" : 3,
+        "checksTotal" : 3,
+        "exactMatches" : 0,
+        "extraRulesPerImage" : 0,
+        "fieldAccuracy" : {
+          "days" : 1,
+          "kind" : 1,
+          "season" : 1,
+          "towZone" : 0.6666666666666666,
+          "window" : 1
+        },
+        "fullImageFallbacks" : 0,
+        "images" : 1,
+        "latency" : {
+          "correct" : {
+            "count" : 1,
+            "mean" : 0,
+            "p50" : 0,
+            "p95" : 0
+          },
+          "detect" : {
+            "count" : 1,
+            "mean" : 0,
+            "p50" : 0,
+            "p95" : 0
+          },
+          "group" : {
+            "count" : 1,
+            "mean" : 2.414042,
+            "p50" : 2.414042,
+            "p95" : 2.414042
+          },
+          "ocr" : {
+            "count" : 1,
+            "mean" : 54.972958,
+            "p50" : 54.972958,
+            "p95" : 54.972958
+          },
+          "parse" : {
+            "count" : 1,
+            "mean" : 2.259666,
+            "p50" : 2.259666,
+            "p95" : 2.259666
+          },
+          "total" : {
+            "count" : 1,
+            "mean" : 59.650292,
+            "p50" : 59.650292,
+            "p95" : 59.650292
+          }
+        },
+        "meanCER" : 0.1271186440677966,
+        "readErrors" : 0,
+        "ruleExactMatchRate" : 0,
+        "signDetectedRate" : 0,
+        "signsDetected" : 0,
+        "verdictAccuracy" : 1
+      },
+      "dusk" : {
+        "checksPassed" : 7,
+        "checksTotal" : 7,
+        "exactMatches" : 0,
+        "extraRulesPerImage" : 0,
+        "fieldAccuracy" : {
+          "days" : 0.8333333333333334,
+          "kind" : 0.8333333333333334,
+          "season" : 0.8333333333333334,
+          "towZone" : 0.6666666666666666,
+          "window" : 0.6666666666666666
+        },
+        "fullImageFallbacks" : 0,
+        "images" : 2,
+        "latency" : {
+          "correct" : {
+            "count" : 2,
+            "mean" : 0,
+            "p50" : 0,
+            "p95" : 0
+          },
+          "detect" : {
+            "count" : 2,
+            "mean" : 0,
+            "p50" : 0,
+            "p95" : 0
+          },
+          "group" : {
+            "count" : 2,
+            "mean" : 3.318792,
+            "p50" : 3.318792,
+            "p95" : 4.1330670000000005
+          },
+          "ocr" : {
+            "count" : 2,
+            "mean" : 65.3181455,
+            "p50" : 65.3181455,
+            "p95" : 74.62881424999999
+          },
+          "parse" : {
+            "count" : 2,
+            "mean" : 2.730479,
+            "p50" : 2.730479,
+            "p95" : 3.1542107
+          },
+          "total" : {
+            "count" : 2,
+            "mean" : 71.3712505,
+            "p50" : 71.3712505,
+            "p95" : 81.92011314999999
+          }
+        },
+        "meanCER" : 0.1948957275638522,
+        "readErrors" : 0,
+        "ruleExactMatchRate" : 0,
+        "signDetectedRate" : 0,
+        "signsDetected" : 0,
+        "verdictAccuracy" : 1
+      },
+      "glare" : {
+        "checksPassed" : 0,
+        "checksTotal" : 2,
+        "exactMatches" : 0,
+        "extraRulesPerImage" : 0,
+        "fieldAccuracy" : {
+          "days" : 0,
+          "kind" : 0,
+          "season" : 0,
+          "towZone" : 0,
+          "window" : 0
+        },
+        "fullImageFallbacks" : 0,
+        "images" : 1,
+        "latency" : {
+          "correct" : {
+            "count" : 1,
+            "mean" : 0,
+            "p50" : 0,
+            "p95" : 0
+          },
+          "detect" : {
+            "count" : 1,
+            "mean" : 0,
+            "p50" : 0,
+            "p95" : 0
+          },
+          "group" : {
+            "count" : 1,
+            "mean" : 1.427291,
+            "p50" : 1.427291,
+            "p95" : 1.427291
+          },
+          "ocr" : {
+            "count" : 1,
+            "mean" : 63.379208,
+            "p50" : 63.379208,
+            "p95" : 63.379208
+          },
+          "parse" : {
+            "count" : 1,
+            "mean" : 1.367667,
+            "p50" : 1.367667,
+            "p95" : 1.367667
+          },
+          "total" : {
+            "count" : 1,
+            "mean" : 66.177208,
+            "p50" : 66.177208,
+            "p95" : 66.177208
+          }
+        },
+        "meanCER" : 0.14634146341463414,
+        "readErrors" : 0,
+        "ruleExactMatchRate" : 0,
+        "signDetectedRate" : 0,
+        "signsDetected" : 0,
+        "verdictAccuracy" : 0
+      },
+      "low-res" : {
+        "checksPassed" : 1,
+        "checksTotal" : 1,
+        "exactMatches" : 1,
+        "extraRulesPerImage" : 0,
+        "fieldAccuracy" : {
+          "days" : 1,
+          "kind" : 1,
+          "season" : 1,
+          "towZone" : 1,
+          "window" : 1
+        },
+        "fullImageFallbacks" : 0,
+        "images" : 1,
+        "latency" : {
+          "correct" : {
+            "count" : 1,
+            "mean" : 0,
+            "p50" : 0,
+            "p95" : 0
+          },
+          "detect" : {
+            "count" : 1,
+            "mean" : 0,
+            "p50" : 0,
+            "p95" : 0
+          },
+          "group" : {
+            "count" : 1,
+            "mean" : 0.589417,
+            "p50" : 0.589417,
+            "p95" : 0.589417
+          },
+          "ocr" : {
+            "count" : 1,
+            "mean" : 31.070833,
+            "p50" : 31.070833,
+            "p95" : 31.070833
+          },
+          "parse" : {
+            "count" : 1,
+            "mean" : 0.492083,
+            "p50" : 0.492083,
+            "p95" : 0.492083
+          },
+          "total" : {
+            "count" : 1,
+            "mean" : 32.156083,
+            "p50" : 32.156083,
+            "p95" : 32.156083
+          }
+        },
+        "meanCER" : 0,
+        "readErrors" : 0,
+        "ruleExactMatchRate" : 1,
+        "signDetectedRate" : 0,
+        "signsDetected" : 0,
+        "verdictAccuracy" : 1
+      },
+      "multi-sign" : {
+        "checksPassed" : 7,
+        "checksTotal" : 7,
+        "exactMatches" : 0,
+        "extraRulesPerImage" : 0,
+        "fieldAccuracy" : {
+          "days" : 0.8333333333333334,
+          "kind" : 0.8333333333333334,
+          "season" : 0.8333333333333334,
+          "towZone" : 0.6666666666666666,
+          "window" : 0.6666666666666666
+        },
+        "fullImageFallbacks" : 0,
+        "images" : 2,
+        "latency" : {
+          "correct" : {
+            "count" : 2,
+            "mean" : 0,
+            "p50" : 0,
+            "p95" : 0
+          },
+          "detect" : {
+            "count" : 2,
+            "mean" : 0,
+            "p50" : 0,
+            "p95" : 0
+          },
+          "group" : {
+            "count" : 2,
+            "mean" : 3.318792,
+            "p50" : 3.318792,
+            "p95" : 4.1330670000000005
+          },
+          "ocr" : {
+            "count" : 2,
+            "mean" : 65.3181455,
+            "p50" : 65.3181455,
+            "p95" : 74.62881424999999
+          },
+          "parse" : {
+            "count" : 2,
+            "mean" : 2.730479,
+            "p50" : 2.730479,
+            "p95" : 3.1542107
+          },
+          "total" : {
+            "count" : 2,
+            "mean" : 71.3712505,
+            "p50" : 71.3712505,
+            "p95" : 81.92011314999999
+          }
+        },
+        "meanCER" : 0.1948957275638522,
+        "readErrors" : 0,
+        "ruleExactMatchRate" : 0,
+        "signDetectedRate" : 0,
+        "signsDetected" : 0,
+        "verdictAccuracy" : 1
+      },
+      "straight" : {
+        "checksPassed" : 3,
+        "checksTotal" : 3,
+        "exactMatches" : 1,
+        "extraRulesPerImage" : 0,
+        "fieldAccuracy" : {
+          "days" : 1,
+          "kind" : 1,
+          "season" : 1,
+          "towZone" : 1,
+          "window" : 1
+        },
+        "fullImageFallbacks" : 0,
+        "images" : 1,
+        "latency" : {
+          "correct" : {
+            "count" : 1,
+            "mean" : 0,
+            "p50" : 0,
+            "p95" : 0
+          },
+          "detect" : {
+            "count" : 1,
+            "mean" : 0,
+            "p50" : 0,
+            "p95" : 0
+          },
+          "group" : {
+            "count" : 1,
+            "mean" : 1.384,
+            "p50" : 1.384,
+            "p95" : 1.384
+          },
+          "ocr" : {
+            "count" : 1,
+            "mean" : 53.20775,
+            "p50" : 53.20775,
+            "p95" : 53.20775
+          },
+          "parse" : {
+            "count" : 1,
+            "mean" : 1.466917,
+            "p50" : 1.466917,
+            "p95" : 1.466917
+          },
+          "total" : {
+            "count" : 1,
+            "mean" : 56.062208,
+            "p50" : 56.062208,
+            "p95" : 56.062208
+          }
+        },
+        "meanCER" : 0.23076923076923078,
+        "readErrors" : 0,
+        "ruleExactMatchRate" : 1,
+        "signDetectedRate" : 0,
+        "signsDetected" : 0,
+        "verdictAccuracy" : 1
+      }
+    },
+    "config" : "no crop",
+    "generatedAt" : "2026-11-04 20:08 EST",
+    "images" : [
+      {
+        "cer" : 0.23076923076923078,
+        "checksPassed" : 3,
+        "checksTotal" : 3,
+        "conditions" : [
+          "day",
+          "straight"
+        ],
+        "detected" : false,
+        "exactMatch" : true,
+        "expectedRuleCount" : 1,
+        "expectedRules" : [
+          "Loading zone 7:00 AM–7:00 PM Mon–Sat (tow zone)"
+        ],
+        "extraRules" : 0,
+        "failedChecks" : [
+
+        ],
+        "fieldHits" : {
+          "days" : 1,
+          "kind" : 1,
+          "season" : 1,
+          "towZone" : 1,
+          "window" : 1
+        },
+        "gotRuleCount" : 1,
+        "gotRules" : [
+          "Loading zone 7:00 AM–7:00 PM Mon–Sat (tow zone)"
+        ],
+        "gotTranscript" : "R Except Commercial Vehicles 7am-7pm | 30 Minute Limit | Except Sun. | Tow Zone",
+        "image" : "images\/commercial_vehicles_tow_zone.jpeg",
+        "split" : "dev",
+        "timings" : {
+          "correct" : 0,
+          "detect" : 0,
+          "group" : 1.384,
+          "ocr" : 53.20775,
+          "parse" : 1.466917,
+          "total" : 56.062208
+        },
+        "usedFallback" : false
+      },
+      {
+        "cer" : 0.2626728110599078,
+        "checksPassed" : 4,
+        "checksTotal" : 4,
+        "conditions" : [
+          "dusk",
+          "multi-sign"
+        ],
+        "detected" : false,
+        "exactMatch" : false,
+        "expectedRuleCount" : 3,
+        "expectedRules" : [
+          "2-hour parking 7:00 AM–4:00 PM Mon–Sat",
+          "Loading zone 4:00 PM–2:00 AM (tow zone)",
+          "2-hour parking 7:00 AM–10:00 PM Mon–Sat"
+        ],
+        "extraRules" : 0,
+        "failedChecks" : [
+
+        ],
+        "fieldHits" : {
+          "days" : 2,
+          "kind" : 2,
+          "season" : 2,
+          "towZone" : 2,
+          "window" : 1
+        },
+        "gotRuleCount" : 2,
+        "gotRules" : [
+          "Loading zone 4:00 PM–2:00 AM (tow zone)",
+          "2-hour parking 7:00 AM–10:00 PM Mon–Sat"
+        ],
+        "gotTranscript" : "HOUR PARKING METER LIMIT 7am - 4pm Except Sunday MULTI-SPACE PAY METER TO PARK | TOW ZONE Pick Up\/Drop Off 4pm - 2am EN PICOP OFF PICK UP \/ ZONE 2 PARKING HOUR METER LIMIT 7am - 10pm Except Sunday PAY MULTI-SPACE METER TO PARK",
+        "image" : "images\/meter_pickup_dropoff_pole.jpeg",
+        "split" : "dev",
+        "timings" : {
+          "correct" : 0,
+          "detect" : 0,
+          "group" : 4.223542,
+          "ocr" : 75.663333,
+          "parse" : 3.201292,
+          "total" : 83.092209
+        },
+        "usedFallback" : false
+      },
+      {
+        "cer" : 0,
+        "checksPassed" : 1,
+        "checksTotal" : 1,
+        "conditions" : [
+          "low-res"
+        ],
+        "detected" : false,
+        "exactMatch" : true,
+        "expectedRuleCount" : 1,
+        "expectedRules" : [
+          "Resident permit only any time"
+        ],
+        "extraRules" : 0,
+        "failedChecks" : [
+
+        ],
+        "fieldHits" : {
+          "days" : 1,
+          "kind" : 1,
+          "season" : 1,
+          "towZone" : 1,
+          "window" : 1
+        },
+        "gotRuleCount" : 1,
+        "gotRules" : [
+          "Resident permit only any time"
+        ],
+        "gotTranscript" : "Resident Permit Parking Only",
+        "image" : "images\/resident_permit_only.jpeg",
+        "split" : "dev",
+        "timings" : {
+          "correct" : 0,
+          "detect" : 0,
+          "group" : 0.589417,
+          "ocr" : 31.070833,
+          "parse" : 0.492083,
+          "total" : 32.156083
+        },
+        "usedFallback" : false
+      },
+      {
+        "cer" : 0.1271186440677966,
+        "checksPassed" : 3,
+        "checksTotal" : 3,
+        "conditions" : [
+          "dusk",
+          "distant",
+          "multi-sign"
+        ],
+        "detected" : false,
+        "exactMatch" : false,
+        "expectedRuleCount" : 3,
+        "expectedRules" : [
+          "2-hour parking 8:00 AM–6:00 PM Mon–Fri, residents exempt",
+          "Street cleaning 12:01 AM–7:00 AM Tue (tow zone)",
+          "Snow emergency route any time (tow zone)"
+        ],
+        "extraRules" : 0,
+        "failedChecks" : [
+
+        ],
+        "fieldHits" : {
+          "days" : 3,
+          "kind" : 3,
+          "season" : 3,
+          "towZone" : 2,
+          "window" : 3
+        },
+        "gotRuleCount" : 3,
+        "gotRules" : [
+          "2-hour parking 8:00 AM–6:00 PM Mon–Fri, residents exempt",
+          "Street cleaning 12:01 AM–7:00 AM Tue (tow zone)",
+          "Snow emergency route any time"
+        ],
+        "gotTranscript" : "South End Parking | 2 Hour Limit Mon-Fri 8am-6pm Except Resident Sticker | TOW LONE | STREET CLEANING 12:01am - 7am TUESDAY DURING | SNOW EMERGENCY",
+        "image" : "images\/south_end_2hr_street_cleaning_snow.jpeg",
+        "split" : "dev",
+        "timings" : {
+          "correct" : 0,
+          "detect" : 0,
+          "group" : 2.414042,
+          "ocr" : 54.972958,
+          "parse" : 2.259666,
+          "total" : 59.650292
+        },
+        "usedFallback" : false
+      },
+      {
+        "cer" : 0.14634146341463414,
+        "checksPassed" : 0,
+        "checksTotal" : 2,
+        "conditions" : [
+          "glare"
+        ],
+        "detected" : false,
+        "exactMatch" : false,
+        "expectedRuleCount" : 1,
+        "expectedRules" : [
+          "12-hour parking 8:00 AM–6:00 PM Mon–Sat"
+        ],
+        "extraRules" : 0,
+        "failedChecks" : [
+          "2026-11-04T10:00: expected canPark, got unreadable",
+          "2026-11-08T10:00: expected canPark, got unreadable"
+        ],
+        "fieldHits" : {
+          "days" : 0,
+          "kind" : 0,
+          "season" : 0,
+          "towZone" : 0,
+          "window" : 0
+        },
+        "gotRuleCount" : 0,
+        "gotRules" : [
+
+        ],
+        "gotTranscript" : "12 PARKING 8AM TO 6PM EXCEPT SUNDAYS & HOLIDAYS | P DAV",
+        "image" : "images\/two_hr_except_sundays_glare.jpeg",
+        "split" : "dev",
+        "timings" : {
+          "correct" : 0,
+          "detect" : 0,
+          "group" : 1.427291,
+          "ocr" : 63.379208,
+          "parse" : 1.367667,
+          "total" : 66.177208
+        },
+        "usedFallback" : false
+      }
+    ],
+    "overall" : {
+      "checksPassed" : 11,
+      "checksTotal" : 13,
+      "exactMatches" : 2,
+      "extraRulesPerImage" : 0,
+      "fieldAccuracy" : {
+        "days" : 0.7777777777777778,
+        "kind" : 0.7777777777777778,
+        "season" : 0.7777777777777778,
+        "towZone" : 0.6666666666666666,
+        "window" : 0.6666666666666666
+      },
+      "fullImageFallbacks" : 0,
+      "images" : 5,
+      "latency" : {
+        "correct" : {
+          "count" : 5,
+          "mean" : 0,
+          "p50" : 0,
+          "p95" : 0
+        },
+        "detect" : {
+          "count" : 5,
+          "mean" : 0,
+          "p50" : 0,
+          "p95" : 0
+        },
+        "group" : {
+          "count" : 5,
+          "mean" : 2.0076584,
+          "p50" : 1.427291,
+          "p95" : 3.861642
+        },
+        "ocr" : {
+          "count" : 5,
+          "mean" : 55.6588164,
+          "p50" : 54.972958,
+          "p95" : 73.20650799999999
+        },
+        "parse" : {
+          "count" : 5,
+          "mean" : 1.757525,
+          "p50" : 1.466917,
+          "p95" : 3.0129668
+        },
+        "total" : {
+          "count" : 5,
+          "mean" : 59.4276,
+          "p50" : 59.650292,
+          "p95" : 79.7092088
+        }
+      },
+      "meanCER" : 0.15338042986231387,
+      "readErrors" : 0,
+      "ruleExactMatchRate" : 0.4,
+      "signDetectedRate" : 0,
+      "signsDetected" : 0,
+      "verdictAccuracy" : 0.8461538461538461
+    },
+    "split" : "dev"
+  },
+  {
+    "byCondition" : {
+      "day" : {
+        "checksPassed" : 3,
+        "checksTotal" : 3,
+        "exactMatches" : 0,
+        "extraRulesPerImage" : 0,
+        "fieldAccuracy" : {
+          "days" : 1,
+          "kind" : 1,
+          "season" : 1,
+          "towZone" : 0,
+          "window" : 1
+        },
+        "fullImageFallbacks" : 0,
+        "images" : 1,
+        "latency" : {
+          "correct" : {
+            "count" : 1,
+            "mean" : 0,
+            "p50" : 0,
+            "p95" : 0
+          },
+          "detect" : {
+            "count" : 1,
+            "mean" : 6.367709,
+            "p50" : 6.367709,
+            "p95" : 6.367709
+          },
+          "group" : {
+            "count" : 1,
+            "mean" : 1.410625,
+            "p50" : 1.410625,
+            "p95" : 1.410625
+          },
+          "ocr" : {
+            "count" : 1,
+            "mean" : 39.232084,
+            "p50" : 39.232084,
+            "p95" : 39.232084
+          },
+          "parse" : {
+            "count" : 1,
+            "mean" : 1.501375,
+            "p50" : 1.501375,
+            "p95" : 1.501375
+          },
+          "total" : {
+            "count" : 1,
+            "mean" : 48.5155,
+            "p50" : 48.5155,
+            "p95" : 48.5155
+          }
+        },
+        "meanCER" : 0.24358974358974358,
+        "readErrors" : 0,
+        "ruleExactMatchRate" : 0,
+        "signDetectedRate" : 0,
+        "signsDetected" : 0,
+        "verdictAccuracy" : 1
+      },
+      "distant" : {
+        "checksPassed" : 3,
+        "checksTotal" : 3,
+        "exactMatches" : 0,
+        "extraRulesPerImage" : 0,
+        "fieldAccuracy" : {
+          "days" : 1,
+          "kind" : 1,
+          "season" : 1,
+          "towZone" : 0.3333333333333333,
+          "window" : 1
+        },
+        "fullImageFallbacks" : 1,
+        "images" : 1,
+        "latency" : {
+          "correct" : {
+            "count" : 1,
+            "mean" : 1.445333,
+            "p50" : 1.445333,
+            "p95" : 1.445333
+          },
+          "detect" : {
+            "count" : 1,
+            "mean" : 6.981875,
+            "p50" : 6.981875,
+            "p95" : 6.981875
+          },
+          "group" : {
+            "count" : 1,
+            "mean" : 3.52075,
+            "p50" : 3.52075,
+            "p95" : 3.52075
+          },
+          "ocr" : {
+            "count" : 1,
+            "mean" : 53.275791999999996,
+            "p50" : 53.275791999999996,
+            "p95" : 53.275791999999996
+          },
+          "parse" : {
+            "count" : 1,
+            "mean" : 3.653708,
+            "p50" : 3.653708,
+            "p95" : 3.653708
+          },
+          "total" : {
+            "count" : 1,
+            "mean" : 68.892083,
+            "p50" : 68.892083,
+            "p95" : 68.892083
+          }
+        },
+        "meanCER" : 0.13559322033898305,
+        "readErrors" : 0,
+        "ruleExactMatchRate" : 0,
+        "signDetectedRate" : 1,
+        "signsDetected" : 1,
+        "verdictAccuracy" : 1
+      },
+      "dusk" : {
+        "checksPassed" : 7,
+        "checksTotal" : 7,
+        "exactMatches" : 0,
+        "extraRulesPerImage" : 0,
+        "fieldAccuracy" : {
+          "days" : 0.8333333333333334,
+          "kind" : 0.8333333333333334,
+          "season" : 0.8333333333333334,
+          "towZone" : 0.5,
+          "window" : 0.6666666666666666
+        },
+        "fullImageFallbacks" : 2,
+        "images" : 2,
+        "latency" : {
+          "correct" : {
+            "count" : 2,
+            "mean" : 1.860229,
+            "p50" : 1.860229,
+            "p95" : 2.2336354
+          },
+          "detect" : {
+            "count" : 2,
+            "mean" : 6.6131665,
+            "p50" : 6.6131665,
+            "p95" : 6.94500415
+          },
+          "group" : {
+            "count" : 2,
+            "mean" : 4.648667,
+            "p50" : 4.648667,
+            "p95" : 5.663792299999999
+          },
+          "ocr" : {
+            "count" : 2,
+            "mean" : 57.53491699999999,
+            "p50" : 57.53491699999999,
+            "p95" : 61.368129499999995
+          },
+          "parse" : {
+            "count" : 2,
+            "mean" : 4.2956035,
+            "p50" : 4.2956035,
+            "p95" : 4.87330945
+          },
+          "total" : {
+            "count" : 2,
+            "mean" : 74.9666245,
+            "p50" : 74.9666245,
+            "p95" : 80.43371185000001
+          }
+        },
+        "meanCER" : 0.19913301569944541,
+        "readErrors" : 0,
+        "ruleExactMatchRate" : 0,
+        "signDetectedRate" : 1,
+        "signsDetected" : 2,
+        "verdictAccuracy" : 1
+      },
+      "glare" : {
+        "checksPassed" : 0,
+        "checksTotal" : 2,
+        "exactMatches" : 0,
+        "extraRulesPerImage" : 0,
+        "fieldAccuracy" : {
+          "days" : 0,
+          "kind" : 0,
+          "season" : 0,
+          "towZone" : 0,
+          "window" : 0
+        },
+        "fullImageFallbacks" : 0,
+        "images" : 1,
+        "latency" : {
+          "correct" : {
+            "count" : 1,
+            "mean" : 3.946625,
+            "p50" : 3.946625,
+            "p95" : 3.946625
+          },
+          "detect" : {
+            "count" : 1,
+            "mean" : 6.405541,
+            "p50" : 6.405541,
+            "p95" : 6.405541
+          },
+          "group" : {
+            "count" : 1,
+            "mean" : 2.9171250000000004,
+            "p50" : 2.9171250000000004,
+            "p95" : 2.9171250000000004
+          },
+          "ocr" : {
+            "count" : 1,
+            "mean" : 74.004958,
+            "p50" : 74.004958,
+            "p95" : 74.004958
+          },
+          "parse" : {
+            "count" : 1,
+            "mean" : 2.574917,
+            "p50" : 2.574917,
+            "p95" : 2.574917
+          },
+          "total" : {
+            "count" : 1,
+            "mean" : 89.858667,
+            "p50" : 89.858667,
+            "p95" : 89.858667
+          }
+        },
+        "meanCER" : 0.04878048780487805,
+        "readErrors" : 0,
+        "ruleExactMatchRate" : 0,
+        "signDetectedRate" : 1,
+        "signsDetected" : 1,
+        "verdictAccuracy" : 0
+      },
+      "low-res" : {
+        "checksPassed" : 1,
+        "checksTotal" : 1,
+        "exactMatches" : 1,
+        "extraRulesPerImage" : 0,
+        "fieldAccuracy" : {
+          "days" : 1,
+          "kind" : 1,
+          "season" : 1,
+          "towZone" : 1,
+          "window" : 1
+        },
+        "fullImageFallbacks" : 1,
+        "images" : 1,
+        "latency" : {
+          "correct" : {
+            "count" : 1,
+            "mean" : 2.620083,
+            "p50" : 2.620083,
+            "p95" : 2.620083
+          },
+          "detect" : {
+            "count" : 1,
+            "mean" : 6.72075,
+            "p50" : 6.72075,
+            "p95" : 6.72075
+          },
+          "group" : {
+            "count" : 1,
+            "mean" : 0.749417,
+            "p50" : 0.749417,
+            "p95" : 0.749417
+          },
+          "ocr" : {
+            "count" : 1,
+            "mean" : 30.793874000000002,
+            "p50" : 30.793874000000002,
+            "p95" : 30.793874000000002
+          },
+          "parse" : {
+            "count" : 1,
+            "mean" : 0.48762500000000003,
+            "p50" : 0.48762500000000003,
+            "p95" : 0.48762500000000003
+          },
+          "total" : {
+            "count" : 1,
+            "mean" : 41.383333,
+            "p50" : 41.383333,
+            "p95" : 41.383333
+          }
+        },
+        "meanCER" : 0,
+        "readErrors" : 0,
+        "ruleExactMatchRate" : 1,
+        "signDetectedRate" : 1,
+        "signsDetected" : 1,
+        "verdictAccuracy" : 1
+      },
+      "multi-sign" : {
+        "checksPassed" : 7,
+        "checksTotal" : 7,
+        "exactMatches" : 0,
+        "extraRulesPerImage" : 0,
+        "fieldAccuracy" : {
+          "days" : 0.8333333333333334,
+          "kind" : 0.8333333333333334,
+          "season" : 0.8333333333333334,
+          "towZone" : 0.5,
+          "window" : 0.6666666666666666
+        },
+        "fullImageFallbacks" : 2,
+        "images" : 2,
+        "latency" : {
+          "correct" : {
+            "count" : 2,
+            "mean" : 1.860229,
+            "p50" : 1.860229,
+            "p95" : 2.2336354
+          },
+          "detect" : {
+            "count" : 2,
+            "mean" : 6.6131665,
+            "p50" : 6.6131665,
+            "p95" : 6.94500415
+          },
+          "group" : {
+            "count" : 2,
+            "mean" : 4.648667,
+            "p50" : 4.648667,
+            "p95" : 5.663792299999999
+          },
+          "ocr" : {
+            "count" : 2,
+            "mean" : 57.53491699999999,
+            "p50" : 57.53491699999999,
+            "p95" : 61.368129499999995
+          },
+          "parse" : {
+            "count" : 2,
+            "mean" : 4.2956035,
+            "p50" : 4.2956035,
+            "p95" : 4.87330945
+          },
+          "total" : {
+            "count" : 2,
+            "mean" : 74.9666245,
+            "p50" : 74.9666245,
+            "p95" : 80.43371185000001
+          }
+        },
+        "meanCER" : 0.19913301569944541,
+        "readErrors" : 0,
+        "ruleExactMatchRate" : 0,
+        "signDetectedRate" : 1,
+        "signsDetected" : 2,
+        "verdictAccuracy" : 1
+      },
+      "straight" : {
+        "checksPassed" : 3,
+        "checksTotal" : 3,
+        "exactMatches" : 0,
+        "extraRulesPerImage" : 0,
+        "fieldAccuracy" : {
+          "days" : 1,
+          "kind" : 1,
+          "season" : 1,
+          "towZone" : 0,
+          "window" : 1
+        },
+        "fullImageFallbacks" : 0,
+        "images" : 1,
+        "latency" : {
+          "correct" : {
+            "count" : 1,
+            "mean" : 0,
+            "p50" : 0,
+            "p95" : 0
+          },
+          "detect" : {
+            "count" : 1,
+            "mean" : 6.367709,
+            "p50" : 6.367709,
+            "p95" : 6.367709
+          },
+          "group" : {
+            "count" : 1,
+            "mean" : 1.410625,
+            "p50" : 1.410625,
+            "p95" : 1.410625
+          },
+          "ocr" : {
+            "count" : 1,
+            "mean" : 39.232084,
+            "p50" : 39.232084,
+            "p95" : 39.232084
+          },
+          "parse" : {
+            "count" : 1,
+            "mean" : 1.501375,
+            "p50" : 1.501375,
+            "p95" : 1.501375
+          },
+          "total" : {
+            "count" : 1,
+            "mean" : 48.5155,
+            "p50" : 48.5155,
+            "p95" : 48.5155
+          }
+        },
+        "meanCER" : 0.24358974358974358,
+        "readErrors" : 0,
+        "ruleExactMatchRate" : 0,
+        "signDetectedRate" : 0,
+        "signsDetected" : 0,
+        "verdictAccuracy" : 1
+      }
+    },
+    "config" : "no language correction",
+    "generatedAt" : "2026-11-04 20:08 EST",
+    "images" : [
+      {
+        "cer" : 0.24358974358974358,
+        "checksPassed" : 3,
+        "checksTotal" : 3,
+        "conditions" : [
+          "day",
+          "straight"
+        ],
+        "detected" : false,
+        "exactMatch" : false,
+        "expectedRuleCount" : 1,
+        "expectedRules" : [
+          "Loading zone 7:00 AM–7:00 PM Mon–Sat (tow zone)"
+        ],
+        "extraRules" : 0,
+        "failedChecks" : [
+
+        ],
+        "fieldHits" : {
+          "days" : 1,
+          "kind" : 1,
+          "season" : 1,
+          "towZone" : 0,
+          "window" : 1
+        },
+        "gotRuleCount" : 1,
+        "gotRules" : [
+          "Loading zone 7:00 AM–7:00 PM Mon–Sat"
+        ],
+        "gotTranscript" : "R Except Commercial Vehicles 7am-7pm | 30 Minute Limit | Except Sun. | Tow Zane",
+        "image" : "images\/commercial_vehicles_tow_zone.jpeg",
+        "split" : "dev",
+        "timings" : {
+          "correct" : 0,
+          "detect" : 6.367709,
+          "group" : 1.410625,
+          "ocr" : 39.232084,
+          "parse" : 1.501375,
+          "total" : 48.5155
+        },
+        "usedFallback" : false
+      },
+      {
+        "cer" : 0.2626728110599078,
+        "checksPassed" : 4,
+        "checksTotal" : 4,
+        "conditions" : [
+          "dusk",
+          "multi-sign"
+        ],
+        "detected" : true,
+        "exactMatch" : false,
+        "expectedRuleCount" : 3,
+        "expectedRules" : [
+          "2-hour parking 7:00 AM–4:00 PM Mon–Sat",
+          "Loading zone 4:00 PM–2:00 AM (tow zone)",
+          "2-hour parking 7:00 AM–10:00 PM Mon–Sat"
+        ],
+        "extraRules" : 0,
+        "failedChecks" : [
+
+        ],
+        "fieldHits" : {
+          "days" : 2,
+          "kind" : 2,
+          "season" : 2,
+          "towZone" : 2,
+          "window" : 1
+        },
+        "gotRuleCount" : 2,
+        "gotRules" : [
+          "Loading zone 4:00 PM–2:00 AM (tow zone)",
+          "2-hour parking 7:00 AM–10:00 PM Mon–Sat"
+        ],
+        "gotTranscript" : "HOUR PARKING METER LIMIT 7am - 4pm Exoept Sunday MULTI-SPACE PAY METER TO PARK | TOW ZONE Pick Up\/Drop Off 4pm - 2am EN PICOP OFEF PICK UP \/ ZONE 2 PARKING HOUR METER LIMIT 7am - 10pm Except Sunday PAY MULTI-SPACE METER TO PARK",
+        "image" : "images\/meter_pickup_dropoff_pole.jpeg",
+        "split" : "dev",
+        "timings" : {
+          "correct" : 2.275125,
+          "detect" : 6.244458,
+          "group" : 5.776584,
+          "ocr" : 61.794042,
+          "parse" : 4.937499,
+          "total" : 81.041166
+        },
+        "usedFallback" : true
+      },
+      {
+        "cer" : 0,
+        "checksPassed" : 1,
+        "checksTotal" : 1,
+        "conditions" : [
+          "low-res"
+        ],
+        "detected" : true,
+        "exactMatch" : true,
+        "expectedRuleCount" : 1,
+        "expectedRules" : [
+          "Resident permit only any time"
+        ],
+        "extraRules" : 0,
+        "failedChecks" : [
+
+        ],
+        "fieldHits" : {
+          "days" : 1,
+          "kind" : 1,
+          "season" : 1,
+          "towZone" : 1,
+          "window" : 1
+        },
+        "gotRuleCount" : 1,
+        "gotRules" : [
+          "Resident permit only any time"
+        ],
+        "gotTranscript" : "Resident Permit Parking Only",
+        "image" : "images\/resident_permit_only.jpeg",
+        "split" : "dev",
+        "timings" : {
+          "correct" : 2.620083,
+          "detect" : 6.72075,
+          "group" : 0.749417,
+          "ocr" : 30.793874000000002,
+          "parse" : 0.48762500000000003,
+          "total" : 41.383333
+        },
+        "usedFallback" : true
+      },
+      {
+        "cer" : 0.13559322033898305,
+        "checksPassed" : 3,
+        "checksTotal" : 3,
+        "conditions" : [
+          "dusk",
+          "distant",
+          "multi-sign"
+        ],
+        "detected" : true,
+        "exactMatch" : false,
+        "expectedRuleCount" : 3,
+        "expectedRules" : [
+          "2-hour parking 8:00 AM–6:00 PM Mon–Fri, residents exempt",
+          "Street cleaning 12:01 AM–7:00 AM Tue (tow zone)",
+          "Snow emergency route any time (tow zone)"
+        ],
+        "extraRules" : 0,
+        "failedChecks" : [
+
+        ],
+        "fieldHits" : {
+          "days" : 3,
+          "kind" : 3,
+          "season" : 3,
+          "towZone" : 1,
+          "window" : 3
+        },
+        "gotRuleCount" : 3,
+        "gotRules" : [
+          "2-hour parking 8:00 AM–6:00 PM Mon–Fri, residents exempt",
+          "Street cleaning 12:01 AM–7:00 AM Tue",
+          "Snow emergency route any time"
+        ],
+        "gotTranscript" : "South End Parking | 2 Hour Limit Mon-Fri 8am-6pm Except Resident Sticker | TOW ZUNÉ | STREET CLEANING 12:01am - 7am TUESDAY DURING | SNOW EMERGENCY",
+        "image" : "images\/south_end_2hr_street_cleaning_snow.jpeg",
+        "split" : "dev",
+        "timings" : {
+          "correct" : 1.445333,
+          "detect" : 6.981875,
+          "group" : 3.52075,
+          "ocr" : 53.275791999999996,
+          "parse" : 3.653708,
+          "total" : 68.892083
+        },
+        "usedFallback" : true
+      },
+      {
+        "cer" : 0.04878048780487805,
+        "checksPassed" : 0,
+        "checksTotal" : 2,
+        "conditions" : [
+          "glare"
+        ],
+        "detected" : true,
+        "exactMatch" : false,
+        "expectedRuleCount" : 1,
+        "expectedRules" : [
+          "12-hour parking 8:00 AM–6:00 PM Mon–Sat"
+        ],
+        "extraRules" : 0,
+        "failedChecks" : [
+          "2026-11-04T10:00: expected canPark, got unreadable",
+          "2026-11-08T10:00: expected canPark, got unreadable"
+        ],
+        "fieldHits" : {
+          "days" : 0,
+          "kind" : 0,
+          "season" : 0,
+          "towZone" : 0,
+          "window" : 0
+        },
+        "gotRuleCount" : 0,
+        "gotRules" : [
+
+        ],
+        "gotTranscript" : "12 PARKING 8AM TO 6PM EXCEPT SUNDAYS & HOLIDAYS",
+        "image" : "images\/two_hr_except_sundays_glare.jpeg",
+        "split" : "dev",
+        "timings" : {
+          "correct" : 3.946625,
+          "detect" : 6.405541,
+          "group" : 2.9171250000000004,
+          "ocr" : 74.004958,
+          "parse" : 2.574917,
+          "total" : 89.858667
+        },
+        "usedFallback" : false
+      }
+    ],
+    "overall" : {
+      "checksPassed" : 11,
+      "checksTotal" : 13,
+      "exactMatches" : 1,
+      "extraRulesPerImage" : 0,
+      "fieldAccuracy" : {
+        "days" : 0.7777777777777778,
+        "kind" : 0.7777777777777778,
+        "season" : 0.7777777777777778,
+        "towZone" : 0.4444444444444444,
+        "window" : 0.6666666666666666
+      },
+      "fullImageFallbacks" : 3,
+      "images" : 5,
+      "latency" : {
+        "correct" : {
+          "count" : 5,
+          "mean" : 2.0574331999999997,
+          "p50" : 2.275125,
+          "p95" : 3.6813165999999997
+        },
+        "detect" : {
+          "count" : 5,
+          "mean" : 6.544066599999999,
+          "p50" : 6.405541,
+          "p95" : 6.92965
+        },
+        "group" : {
+          "count" : 5,
+          "mean" : 2.8749002,
+          "p50" : 2.9171250000000004,
+          "p95" : 5.3254171999999995
+        },
+        "ocr" : {
+          "count" : 5,
+          "mean" : 51.82015,
+          "p50" : 53.275791999999996,
+          "p95" : 71.5627748
+        },
+        "parse" : {
+          "count" : 5,
+          "mean" : 2.6310248,
+          "p50" : 2.574917,
+          "p95" : 4.6807408
+        },
+        "total" : {
+          "count" : 5,
+          "mean" : 65.93814979999999,
+          "p50" : 68.892083,
+          "p95" : 88.0951668
+        }
+      },
+      "meanCER" : 0.1381272525587025,
+      "readErrors" : 0,
+      "ruleExactMatchRate" : 0.2,
+      "signDetectedRate" : 0.8,
+      "signsDetected" : 4,
+      "verdictAccuracy" : 0.8461538461538461
+    },
+    "split" : "dev"
+  },
+  {
+    "byCondition" : {
+      "day" : {
+        "checksPassed" : 2,
+        "checksTotal" : 3,
+        "exactMatches" : 0,
+        "extraRulesPerImage" : 0,
+        "fieldAccuracy" : {
+          "days" : 1,
+          "kind" : 1,
+          "season" : 1,
+          "towZone" : 0,
+          "window" : 0
+        },
+        "fullImageFallbacks" : 0,
+        "images" : 1,
+        "latency" : {
+          "correct" : {
+            "count" : 1,
+            "mean" : 0,
+            "p50" : 0,
+            "p95" : 0
+          },
+          "detect" : {
+            "count" : 1,
+            "mean" : 6.87375,
+            "p50" : 6.87375,
+            "p95" : 6.87375
+          },
+          "group" : {
+            "count" : 1,
+            "mean" : 1.274416,
+            "p50" : 1.274416,
+            "p95" : 1.274416
+          },
+          "ocr" : {
+            "count" : 1,
+            "mean" : 18.731708,
+            "p50" : 18.731708,
+            "p95" : 18.731708
+          },
+          "parse" : {
+            "count" : 1,
+            "mean" : 1.493083,
+            "p50" : 1.493083,
+            "p95" : 1.493083
+          },
+          "total" : {
+            "count" : 1,
+            "mean" : 28.377209,
+            "p50" : 28.377209,
+            "p95" : 28.377209
+          }
+        },
+        "meanCER" : 0.2692307692307692,
+        "readErrors" : 0,
+        "ruleExactMatchRate" : 0,
+        "signDetectedRate" : 0,
+        "signsDetected" : 0,
+        "verdictAccuracy" : 0.6666666666666666
+      },
+      "distant" : {
+        "checksPassed" : 2,
+        "checksTotal" : 3,
+        "exactMatches" : 0,
+        "extraRulesPerImage" : 0,
+        "fieldAccuracy" : {
+          "days" : 0,
+          "kind" : 0.3333333333333333,
+          "season" : 0.3333333333333333,
+          "towZone" : 0.3333333333333333,
+          "window" : 0
+        },
+        "fullImageFallbacks" : 0,
+        "images" : 1,
+        "latency" : {
+          "correct" : {
+            "count" : 1,
+            "mean" : 1.533333,
+            "p50" : 1.533333,
+            "p95" : 1.533333
+          },
+          "detect" : {
+            "count" : 1,
+            "mean" : 7.05225,
+            "p50" : 7.05225,
+            "p95" : 7.05225
+          },
+          "group" : {
+            "count" : 1,
+            "mean" : 2.824542,
+            "p50" : 2.824542,
+            "p95" : 2.824542
+          },
+          "ocr" : {
+            "count" : 1,
+            "mean" : 29.260708,
+            "p50" : 29.260708,
+            "p95" : 29.260708
+          },
+          "parse" : {
+            "count" : 1,
+            "mean" : 2.599709,
+            "p50" : 2.599709,
+            "p95" : 2.599709
+          },
+          "total" : {
+            "count" : 1,
+            "mean" : 43.276792,
+            "p50" : 43.276792,
+            "p95" : 43.276792
+          }
+        },
+        "meanCER" : 0.788135593220339,
+        "readErrors" : 0,
+        "ruleExactMatchRate" : 0,
+        "signDetectedRate" : 1,
+        "signsDetected" : 1,
+        "verdictAccuracy" : 0.6666666666666666
+      },
+      "dusk" : {
+        "checksPassed" : 3,
+        "checksTotal" : 7,
+        "exactMatches" : 0,
+        "extraRulesPerImage" : 0,
+        "fieldAccuracy" : {
+          "days" : 0.16666666666666666,
+          "kind" : 0.3333333333333333,
+          "season" : 0.5,
+          "towZone" : 0.5,
+          "window" : 0
+        },
+        "fullImageFallbacks" : 1,
+        "images" : 2,
+        "latency" : {
+          "correct" : {
+            "count" : 2,
+            "mean" : 2.034937,
+            "p50" : 2.034937,
+            "p95" : 2.4863806
+          },
+          "detect" : {
+            "count" : 2,
+            "mean" : 6.843021,
+            "p50" : 6.843021,
+            "p95" : 7.0313270999999995
+          },
+          "group" : {
+            "count" : 2,
+            "mean" : 2.9492085,
+            "p50" : 2.9492085,
+            "p95" : 3.0614083500000002
+          },
+          "ocr" : {
+            "count" : 2,
+            "mean" : 31.2428125,
+            "p50" : 31.2428125,
+            "p95" : 33.02670655
+          },
+          "parse" : {
+            "count" : 2,
+            "mean" : 2.7612295,
+            "p50" : 2.7612295,
+            "p95" : 2.9065979499999997
+          },
+          "total" : {
+            "count" : 2,
+            "mean" : 45.8409585,
+            "p50" : 45.8409585,
+            "p95" : 48.14870835
+          }
+        },
+        "meanCER" : 0.7489065062875888,
+        "readErrors" : 0,
+        "ruleExactMatchRate" : 0,
+        "signDetectedRate" : 1,
+        "signsDetected" : 2,
+        "verdictAccuracy" : 0.42857142857142855
+      },
+      "glare" : {
+        "checksPassed" : 0,
+        "checksTotal" : 2,
+        "exactMatches" : 0,
+        "extraRulesPerImage" : 0,
+        "fieldAccuracy" : {
+          "days" : 0,
+          "kind" : 0,
+          "season" : 0,
+          "towZone" : 0,
+          "window" : 0
+        },
+        "fullImageFallbacks" : 0,
+        "images" : 1,
+        "latency" : {
+          "correct" : {
+            "count" : 1,
+            "mean" : 4.316167,
+            "p50" : 4.316167,
+            "p95" : 4.316167
+          },
+          "detect" : {
+            "count" : 1,
+            "mean" : 6.022541,
+            "p50" : 6.022541,
+            "p95" : 6.022541
+          },
+          "group" : {
+            "count" : 1,
+            "mean" : 2.998208,
+            "p50" : 2.998208,
+            "p95" : 2.998208
+          },
+          "ocr" : {
+            "count" : 1,
+            "mean" : 19.697792,
+            "p50" : 19.697792,
+            "p95" : 19.697792
+          },
+          "parse" : {
+            "count" : 1,
+            "mean" : 2.327083,
+            "p50" : 2.327083,
+            "p95" : 2.327083
+          },
+          "total" : {
+            "count" : 1,
+            "mean" : 35.366834,
+            "p50" : 35.366834,
+            "p95" : 35.366834
+          }
+        },
+        "meanCER" : 0.12195121951219512,
+        "readErrors" : 0,
+        "ruleExactMatchRate" : 0,
+        "signDetectedRate" : 1,
+        "signsDetected" : 1,
+        "verdictAccuracy" : 0
+      },
+      "low-res" : {
+        "checksPassed" : 1,
+        "checksTotal" : 1,
+        "exactMatches" : 1,
+        "extraRulesPerImage" : 0,
+        "fieldAccuracy" : {
+          "days" : 1,
+          "kind" : 1,
+          "season" : 1,
+          "towZone" : 1,
+          "window" : 1
+        },
+        "fullImageFallbacks" : 1,
+        "images" : 1,
+        "latency" : {
+          "correct" : {
+            "count" : 1,
+            "mean" : 2.753416,
+            "p50" : 2.753416,
+            "p95" : 2.753416
+          },
+          "detect" : {
+            "count" : 1,
+            "mean" : 8.164083,
+            "p50" : 8.164083,
+            "p95" : 8.164083
+          },
+          "group" : {
+            "count" : 1,
+            "mean" : 0.6027089999999999,
+            "p50" : 0.6027089999999999,
+            "p95" : 0.6027089999999999
+          },
+          "ocr" : {
+            "count" : 1,
+            "mean" : 13.825375000000001,
+            "p50" : 13.825375000000001,
+            "p95" : 13.825375000000001
+          },
+          "parse" : {
+            "count" : 1,
+            "mean" : 0.45725,
+            "p50" : 0.45725,
+            "p95" : 0.45725
+          },
+          "total" : {
+            "count" : 1,
+            "mean" : 25.81325,
+            "p50" : 25.81325,
+            "p95" : 25.81325
+          }
+        },
+        "meanCER" : 0,
+        "readErrors" : 0,
+        "ruleExactMatchRate" : 1,
+        "signDetectedRate" : 1,
+        "signsDetected" : 1,
+        "verdictAccuracy" : 1
+      },
+      "multi-sign" : {
+        "checksPassed" : 3,
+        "checksTotal" : 7,
+        "exactMatches" : 0,
+        "extraRulesPerImage" : 0,
+        "fieldAccuracy" : {
+          "days" : 0.16666666666666666,
+          "kind" : 0.3333333333333333,
+          "season" : 0.5,
+          "towZone" : 0.5,
+          "window" : 0
+        },
+        "fullImageFallbacks" : 1,
+        "images" : 2,
+        "latency" : {
+          "correct" : {
+            "count" : 2,
+            "mean" : 2.034937,
+            "p50" : 2.034937,
+            "p95" : 2.4863806
+          },
+          "detect" : {
+            "count" : 2,
+            "mean" : 6.843021,
+            "p50" : 6.843021,
+            "p95" : 7.0313270999999995
+          },
+          "group" : {
+            "count" : 2,
+            "mean" : 2.9492085,
+            "p50" : 2.9492085,
+            "p95" : 3.0614083500000002
+          },
+          "ocr" : {
+            "count" : 2,
+            "mean" : 31.2428125,
+            "p50" : 31.2428125,
+            "p95" : 33.02670655
+          },
+          "parse" : {
+            "count" : 2,
+            "mean" : 2.7612295,
+            "p50" : 2.7612295,
+            "p95" : 2.9065979499999997
+          },
+          "total" : {
+            "count" : 2,
+            "mean" : 45.8409585,
+            "p50" : 45.8409585,
+            "p95" : 48.14870835
+          }
+        },
+        "meanCER" : 0.7489065062875888,
+        "readErrors" : 0,
+        "ruleExactMatchRate" : 0,
+        "signDetectedRate" : 1,
+        "signsDetected" : 2,
+        "verdictAccuracy" : 0.42857142857142855
+      },
+      "straight" : {
+        "checksPassed" : 2,
+        "checksTotal" : 3,
+        "exactMatches" : 0,
+        "extraRulesPerImage" : 0,
+        "fieldAccuracy" : {
+          "days" : 1,
+          "kind" : 1,
+          "season" : 1,
+          "towZone" : 0,
+          "window" : 0
+        },
+        "fullImageFallbacks" : 0,
+        "images" : 1,
+        "latency" : {
+          "correct" : {
+            "count" : 1,
+            "mean" : 0,
+            "p50" : 0,
+            "p95" : 0
+          },
+          "detect" : {
+            "count" : 1,
+            "mean" : 6.87375,
+            "p50" : 6.87375,
+            "p95" : 6.87375
+          },
+          "group" : {
+            "count" : 1,
+            "mean" : 1.274416,
+            "p50" : 1.274416,
+            "p95" : 1.274416
+          },
+          "ocr" : {
+            "count" : 1,
+            "mean" : 18.731708,
+            "p50" : 18.731708,
+            "p95" : 18.731708
+          },
+          "parse" : {
+            "count" : 1,
+            "mean" : 1.493083,
+            "p50" : 1.493083,
+            "p95" : 1.493083
+          },
+          "total" : {
+            "count" : 1,
+            "mean" : 28.377209,
+            "p50" : 28.377209,
+            "p95" : 28.377209
+          }
+        },
+        "meanCER" : 0.2692307692307692,
+        "readErrors" : 0,
+        "ruleExactMatchRate" : 0,
+        "signDetectedRate" : 0,
+        "signsDetected" : 0,
+        "verdictAccuracy" : 0.6666666666666666
+      }
+    },
+    "config" : "fast mode",
+    "generatedAt" : "2026-11-04 20:08 EST",
+    "images" : [
+      {
+        "cer" : 0.2692307692307692,
+        "checksPassed" : 2,
+        "checksTotal" : 3,
+        "conditions" : [
+          "day",
+          "straight"
+        ],
+        "detected" : false,
+        "exactMatch" : false,
+        "expectedRuleCount" : 1,
+        "expectedRules" : [
+          "Loading zone 7:00 AM–7:00 PM Mon–Sat (tow zone)"
+        ],
+        "extraRules" : 0,
+        "failedChecks" : [
+          "2026-11-04T20:00: expected canPark, got cannotPark"
+        ],
+        "fieldHits" : {
+          "days" : 1,
+          "kind" : 1,
+          "season" : 1,
+          "towZone" : 0,
+          "window" : 0
+        },
+        "gotRuleCount" : 1,
+        "gotRules" : [
+          "Loading zone any time Mon–Sat"
+        ],
+        "gotTranscript" : "Except ComMercial Vehicles 7ani-7pm | 30 Minute Limit | Except sun. | Tow Zme",
+        "image" : "images\/commercial_vehicles_tow_zone.jpeg",
+        "split" : "dev",
+        "timings" : {
+          "correct" : 0,
+          "detect" : 6.87375,
+          "group" : 1.274416,
+          "ocr" : 18.731708,
+          "parse" : 1.493083,
+          "total" : 28.377209
+        },
+        "usedFallback" : false
+      },
+      {
+        "cer" : 0.7096774193548387,
+        "checksPassed" : 1,
+        "checksTotal" : 4,
+        "conditions" : [
+          "dusk",
+          "multi-sign"
+        ],
+        "detected" : true,
+        "exactMatch" : false,
+        "expectedRuleCount" : 3,
+        "expectedRules" : [
+          "2-hour parking 7:00 AM–4:00 PM Mon–Sat",
+          "Loading zone 4:00 PM–2:00 AM (tow zone)",
+          "2-hour parking 7:00 AM–10:00 PM Mon–Sat"
+        ],
+        "extraRules" : 0,
+        "failedChecks" : [
+          "2026-11-04T10:00: expected canPark, got cannotPark",
+          "2026-11-05T03:00: expected canPark, got cannotPark",
+          "2026-11-08T10:00: expected canPark, got cannotPark"
+        ],
+        "fieldHits" : {
+          "days" : 1,
+          "kind" : 1,
+          "season" : 2,
+          "towZone" : 2,
+          "window" : 0
+        },
+        "gotRuleCount" : 2,
+        "gotRules" : [
+          "Loading zone any time (tow zone)",
+          "Loading zone any time"
+        ],
+        "gotTranscript" : "TOW zONE | PICK UP I DROP OFF P4°RKINQ HOIJR 7am 10pm ExoDDt Sundnv PAY MULM-SPACE MFfER TO PARK",
+        "image" : "images\/meter_pickup_dropoff_pole.jpeg",
+        "split" : "dev",
+        "timings" : {
+          "correct" : 2.536541,
+          "detect" : 6.633792,
+          "group" : 3.073875,
+          "ocr" : 33.224917,
+          "parse" : 2.9227499999999997,
+          "total" : 48.405125
+        },
+        "usedFallback" : true
+      },
+      {
+        "cer" : 0,
+        "checksPassed" : 1,
+        "checksTotal" : 1,
+        "conditions" : [
+          "low-res"
+        ],
+        "detected" : true,
+        "exactMatch" : true,
+        "expectedRuleCount" : 1,
+        "expectedRules" : [
+          "Resident permit only any time"
+        ],
+        "extraRules" : 0,
+        "failedChecks" : [
+
+        ],
+        "fieldHits" : {
+          "days" : 1,
+          "kind" : 1,
+          "season" : 1,
+          "towZone" : 1,
+          "window" : 1
+        },
+        "gotRuleCount" : 1,
+        "gotRules" : [
+          "Resident permit only any time"
+        ],
+        "gotTranscript" : "Resident Permit Parking Only",
+        "image" : "images\/resident_permit_only.jpeg",
+        "split" : "dev",
+        "timings" : {
+          "correct" : 2.753416,
+          "detect" : 8.164083,
+          "group" : 0.6027089999999999,
+          "ocr" : 13.825375000000001,
+          "parse" : 0.45725,
+          "total" : 25.81325
+        },
+        "usedFallback" : true
+      },
+      {
+        "cer" : 0.788135593220339,
+        "checksPassed" : 2,
+        "checksTotal" : 3,
+        "conditions" : [
+          "dusk",
+          "distant",
+          "multi-sign"
+        ],
+        "detected" : true,
+        "exactMatch" : false,
+        "expectedRuleCount" : 3,
+        "expectedRules" : [
+          "2-hour parking 8:00 AM–6:00 PM Mon–Fri, residents exempt",
+          "Street cleaning 12:01 AM–7:00 AM Tue (tow zone)",
+          "Snow emergency route any time (tow zone)"
+        ],
+        "extraRules" : 0,
+        "failedChecks" : [
+          "2026-11-10T03:00: expected cannotPark, got canPark"
+        ],
+        "fieldHits" : {
+          "days" : 0,
+          "kind" : 1,
+          "season" : 1,
+          "towZone" : 1,
+          "window" : 0
+        },
+        "gotRuleCount" : 1,
+        "gotRules" : [
+          "2-hour parking any time"
+        ],
+        "gotTranscript" : "Parking | 2 Hour Limit Alon.Frl Oam4pm",
+        "image" : "images\/south_end_2hr_street_cleaning_snow.jpeg",
+        "split" : "dev",
+        "timings" : {
+          "correct" : 1.533333,
+          "detect" : 7.05225,
+          "group" : 2.824542,
+          "ocr" : 29.260708,
+          "parse" : 2.599709,
+          "total" : 43.276792
+        },
+        "usedFallback" : false
+      },
+      {
+        "cer" : 0.12195121951219512,
+        "checksPassed" : 0,
+        "checksTotal" : 2,
+        "conditions" : [
+          "glare"
+        ],
+        "detected" : true,
+        "exactMatch" : false,
+        "expectedRuleCount" : 1,
+        "expectedRules" : [
+          "12-hour parking 8:00 AM–6:00 PM Mon–Sat"
+        ],
+        "extraRules" : 0,
+        "failedChecks" : [
+          "2026-11-04T10:00: expected canPark, got unreadable",
+          "2026-11-08T10:00: expected canPark, got unreadable"
+        ],
+        "fieldHits" : {
+          "days" : 0,
+          "kind" : 0,
+          "season" : 0,
+          "towZone" : 0,
+          "window" : 0
+        },
+        "gotRuleCount" : 0,
+        "gotRules" : [
+
+        ],
+        "gotTranscript" : "\",4RII PARKING 8AM TO 6PM EXCEPT SUNDAYS & HOLIDAYS",
+        "image" : "images\/two_hr_except_sundays_glare.jpeg",
+        "split" : "dev",
+        "timings" : {
+          "correct" : 4.316167,
+          "detect" : 6.022541,
+          "group" : 2.998208,
+          "ocr" : 19.697792,
+          "parse" : 2.327083,
+          "total" : 35.366834
+        },
+        "usedFallback" : false
+      }
+    ],
+    "overall" : {
+      "checksPassed" : 6,
+      "checksTotal" : 13,
+      "exactMatches" : 1,
+      "extraRulesPerImage" : 0,
+      "fieldAccuracy" : {
+        "days" : 0.3333333333333333,
+        "kind" : 0.4444444444444444,
+        "season" : 0.5555555555555556,
+        "towZone" : 0.4444444444444444,
+        "window" : 0.1111111111111111
+      },
+      "fullImageFallbacks" : 2,
+      "images" : 5,
+      "latency" : {
+        "correct" : {
+          "count" : 5,
+          "mean" : 2.2278914,
+          "p50" : 2.536541,
+          "p95" : 4.0036168
+        },
+        "detect" : {
+          "count" : 5,
+          "mean" : 6.949283199999999,
+          "p50" : 6.87375,
+          "p95" : 7.9417164
+        },
+        "group" : {
+          "count" : 5,
+          "mean" : 2.15475,
+          "p50" : 2.824542,
+          "p95" : 3.0587416000000003
+        },
+        "ocr" : {
+          "count" : 5,
+          "mean" : 22.9481,
+          "p50" : 19.697792,
+          "p95" : 32.4320752
+        },
+        "parse" : {
+          "count" : 5,
+          "mean" : 1.959975,
+          "p50" : 2.327083,
+          "p95" : 2.8581418
+        },
+        "total" : {
+          "count" : 5,
+          "mean" : 36.24784199999999,
+          "p50" : 35.366834,
+          "p95" : 47.3794584
+        }
+      },
+      "meanCER" : 0.3777990002636284,
+      "readErrors" : 0,
+      "ruleExactMatchRate" : 0.2,
+      "signDetectedRate" : 0.8,
+      "signsDetected" : 4,
+      "verdictAccuracy" : 0.46153846153846156
+    },
+    "split" : "dev"
+  }
+]

@@ -2,6 +2,7 @@ import CoreGraphics
 
 /// Four corners of a detected sign, normalized 0...1 with Vision's origin at the BOTTOM-left.
 public struct Quad: Hashable, Sendable, Codable {
+    /// Normalized corner (Vision coordinates: origin bottom-left).
     public var topLeft: CGPoint
     public var topRight: CGPoint
     public var bottomRight: CGPoint
@@ -18,6 +19,7 @@ public struct Quad: Hashable, Sendable, Codable {
     public static let unit = Quad(topLeft: CGPoint(x: 0, y: 1), topRight: CGPoint(x: 1, y: 1),
                                   bottomRight: CGPoint(x: 1, y: 0), bottomLeft: CGPoint(x: 0, y: 0))
 
+    /// Corners clockwise from the top left.
     public var corners: [CGPoint] { [topLeft, topRight, bottomRight, bottomLeft] }
 
     /// Area by the shoelace formula (normalized units).
@@ -78,11 +80,13 @@ public struct Quad: Hashable, Sendable, Codable {
 /// Core Image: pixels, origin BOTTOM-left (same direction as Vision — scale only).
 /// UIKit / SwiftUI / CGImage drawing: pixels, origin TOP-left (y must be flipped).
 public enum VisionGeometry {
+    /// Where the target coordinate system's origin is.
     public enum Origin: Sendable {
         case bottomLeft   // Core Image
         case topLeft      // UIKit, SwiftUI, image pixel rows
     }
 
+    /// Converts a Vision point (normalized, bottom-left origin) to pixels in an image of `imageSize`.
     public static func pixelPoint(_ normalized: CGPoint, imageSize: CGSize, origin: Origin) -> CGPoint {
         let x = normalized.x * imageSize.width
         switch origin {
@@ -91,6 +95,7 @@ public enum VisionGeometry {
         }
     }
 
+    /// Converts a Vision rect (normalized, bottom-left origin) to pixels in an image of `imageSize`.
     public static func pixelRect(_ normalized: CGRect, imageSize: CGSize, origin: Origin) -> CGRect {
         let width = normalized.width * imageSize.width
         let height = normalized.height * imageSize.height

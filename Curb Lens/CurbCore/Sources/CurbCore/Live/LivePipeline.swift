@@ -16,6 +16,7 @@ public struct MotionSample: Sendable, Equatable {
         self.rotationRate = rotationRate
     }
 
+    /// Total rotation speed in rad/s.
     public var rotationMagnitude: Double {
         (rotationRate.x * rotationRate.x + rotationRate.y * rotationRate.y + rotationRate.z * rotationRate.z).squareRoot()
     }
@@ -32,6 +33,7 @@ public enum SteadinessRule {
     /// Turning slower than this (rad/s) counts as holding still.
     public static let maxRotation = 0.5
 
+    /// True when a frame taken now is worth reading.
     public static func isSteady(_ sample: MotionSample) -> Bool {
         sample.gravityY < maxGravityY && sample.rotationMagnitude < maxRotation
     }
@@ -42,7 +44,9 @@ public enum SteadinessRule {
 /// Single fast-OCR frames flicker ("2 HOUR" one frame, "2 HOIR" the next). Requiring 3 of the last 6
 /// processed frames to agree removes most of that noise for about one second of extra latency at 3 fps.
 public struct FrameVoter: Sendable {
+    /// How many recent frames vote.
     public let window: Int
+    /// Votes a rule set needs to be trusted.
     public let threshold: Int
     private(set) var history: [Set<ParkingRule>] = []
 
@@ -51,6 +55,7 @@ public struct FrameVoter: Sendable {
         self.threshold = threshold
     }
 
+    /// The vote after adding a frame.
     public struct Result: Equatable, Sendable {
         /// The agreed rules, or nil while no non-empty rule set has `threshold` votes.
         public var stableRules: [ParkingRule]?
@@ -74,6 +79,7 @@ public struct FrameVoter: Sendable {
         return Result(stableRules: stable, topVotes: votes)
     }
 
+    /// Forgets all votes (after a capture).
     public mutating func reset() {
         history.removeAll()
     }
@@ -102,6 +108,7 @@ public final class FrameThrottle: @unchecked Sendable {
         return true
     }
 
+    /// Marks the in-flight frame as finished.
     public func end() {
         lock.lock()
         busy = false
@@ -125,6 +132,7 @@ extension VisionGeometry {
         return pixelRect(normalized, imageSize: drawn, origin: .topLeft).offsetBy(dx: offset.x, dy: offset.y)
     }
 
+    /// Maps a Vision point in the upright image to view points, like `aspectFillRect`.
     public static func aspectFillPoint(_ normalized: CGPoint, imageSize: CGSize, viewSize: CGSize) -> CGPoint {
         let (drawn, offset) = aspectFillLayout(imageSize: imageSize, viewSize: viewSize)
         let p = pixelPoint(normalized, imageSize: drawn, origin: .topLeft)
