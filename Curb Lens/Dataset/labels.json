@@ -1,0 +1,80 @@
+[
+  {
+    "image": "images/commercial_vehicles_tow_zone.jpeg",
+    "split": "dev",
+    "conditions": ["day", "straight"],
+    "transcript": "EXCEPT COMMERCIAL VEHICLES AS DEFINED BY B.T.D. 7AM-7PM 30 MINUTE LIMIT | EXCEPT SUN. | TOW ZONE",
+    "rules": [
+      {"kind": {"type": "loadingZone"}, "days": {"days": ["MON", "TUE", "WED", "THU", "FRI", "SAT"]},
+       "window": {"start": "07:00", "end": "19:00"}, "towZone": true}
+    ],
+    "checks": [
+      {"at": "2026-11-04T10:00", "expect": "cannotPark"},
+      {"at": "2026-11-04T20:00", "expect": "canPark"},
+      {"at": "2026-11-08T10:00", "expect": "canPark"}
+    ]
+  },
+  {
+    "image": "images/meter_pickup_dropoff_pole.jpeg",
+    "split": "dev",
+    "conditions": ["dusk", "multi-sign"],
+    "transcript": "2 HOUR PARKING METER LIMIT 7AM - 4PM EXCEPT SUNDAY PAY MULTI-SPACE METER TO PARK | TOW ZONE PICK UP/DROP OFF 4PM - 2AM DRIVER MUST STAY WITH VEHICLE 15 MINUTE LIMIT | PICK UP / DROP OFF ZONE | 2 HOUR PARKING METER LIMIT 7AM - 10PM EXCEPT SUNDAY PAY MULTI-SPACE METER TO PARK",
+    "rules": [
+      {"kind": {"type": "timeLimit", "minutes": 120}, "days": {"days": ["MON", "TUE", "WED", "THU", "FRI", "SAT"]},
+       "window": {"start": "07:00", "end": "16:00"}},
+      {"kind": {"type": "loadingZone"}, "window": {"start": "16:00", "end": "02:00"}, "towZone": true},
+      {"kind": {"type": "timeLimit", "minutes": 120}, "days": {"days": ["MON", "TUE", "WED", "THU", "FRI", "SAT"]},
+       "window": {"start": "07:00", "end": "22:00"}}
+    ],
+    "checks": [
+      {"at": "2026-11-04T10:00", "expect": "canPark"},
+      {"at": "2026-11-04T17:00", "expect": "cannotPark"},
+      {"at": "2026-11-05T03:00", "expect": "canPark"},
+      {"at": "2026-11-08T10:00", "expect": "canPark"}
+    ]
+  },
+  {
+    "image": "images/resident_permit_only.jpeg",
+    "split": "dev",
+    "conditions": ["low-res"],
+    "transcript": "RESIDENT PERMIT PARKING ONLY",
+    "rules": [
+      {"kind": {"type": "permitOnly"}}
+    ],
+    "checks": [
+      {"at": "2026-11-04T10:00", "expect": "canPark"}
+    ]
+  },
+  {
+    "image": "images/south_end_2hr_street_cleaning_snow.jpeg",
+    "split": "dev",
+    "conditions": ["dusk", "distant", "multi-sign"],
+    "transcript": "SOUTH END | PARKING 2 HOUR LIMIT MON-FRI 8AM-6PM EXCEPT RESIDENT STICKER | TOW ZONE | STREET CLEANING TUESDAY 12:01AM - 7AM | DURING SNOW EMERGENCY",
+    "rules": [
+      {"kind": {"type": "timeLimit", "minutes": 120}, "days": {"days": ["MON", "TUE", "WED", "THU", "FRI"]},
+       "window": {"start": "08:00", "end": "18:00"}, "residentExempt": true},
+      {"kind": {"type": "streetCleaning"}, "days": {"days": ["TUE"]},
+       "window": {"start": "00:01", "end": "07:00"}, "towZone": true},
+      {"kind": {"type": "snowEmergency"}, "towZone": true}
+    ],
+    "checks": [
+      {"at": "2026-11-10T03:00", "expect": "cannotPark"},
+      {"at": "2026-11-04T10:00", "expect": "canPark"},
+      {"at": "2026-11-09T20:00", "expect": "canPark"}
+    ]
+  },
+  {
+    "image": "images/two_hr_except_sundays_glare.jpeg",
+    "split": "dev",
+    "conditions": ["glare"],
+    "transcript": "12 HR PARKING | 8AM TO 6PM EXCEPT SUNDAYS & HOLIDAYS",
+    "rules": [
+      {"kind": {"type": "timeLimit", "minutes": 720}, "days": {"days": ["MON", "TUE", "WED", "THU", "FRI", "SAT"]},
+       "window": {"start": "08:00", "end": "18:00"}}
+    ],
+    "checks": [
+      {"at": "2026-11-04T10:00", "expect": "canPark"},
+      {"at": "2026-11-08T10:00", "expect": "canPark"}
+    ]
+  }
+]

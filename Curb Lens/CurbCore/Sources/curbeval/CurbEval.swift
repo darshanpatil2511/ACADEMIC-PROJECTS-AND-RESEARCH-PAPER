@@ -7,11 +7,11 @@ struct CurbEval: AsyncParsableCommand {
         commandName: "curbeval",
         abstract: "Read parking-sign photos and evaluate the CurbLens pipeline.",
         version: CurbCore.version,
-        subcommands: [Read.self]
+        subcommands: [Read.self, Eval.self, Ablate.self]
     )
 }
 
-/// Reader flags shared by `read` (and later `eval`).
+/// Reader flags shared by `read` and `eval`.
 struct ReaderFlags: ParsableArguments {
     @Flag(help: "Use Vision's fast recognition level instead of accurate.")
     var fast = false

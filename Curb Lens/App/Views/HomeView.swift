@@ -9,6 +9,8 @@ struct HomeView: View {
     @State private var pickerItem: PhotosPickerItem?
     /// Debug aid: `-CurbLensOpenSaved YES` opens the saved-signs screen on launch.
     @State private var showSaved = UserDefaults.standard.bool(forKey: "CurbLensOpenSaved")
+    /// Debug aid: `-CurbLensOpenBenchmark YES` opens the benchmark on launch.
+    @State private var showBenchmark = UserDefaults.standard.bool(forKey: "CurbLensOpenBenchmark")
 
     var body: some View {
         @Bindable var model = model
@@ -56,6 +58,15 @@ struct HomeView: View {
                 ResultView(result: result)
             }
             .navigationDestination(isPresented: $showSaved) { SavedSignsView() }
+            .navigationDestination(isPresented: $showBenchmark) { BenchmarkView() }
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button { showBenchmark = true } label: {
+                        Image(systemName: "gauge.with.dots.needle.67percent")
+                    }
+                    .accessibilityLabel("On-device benchmark")
+                }
+            }
             .navigationDestination(for: SavedSign.self) { SavedSignDetailView(sign: $0) }
             .onChange(of: pickerItem) { _, item in
                 guard let item else { return }

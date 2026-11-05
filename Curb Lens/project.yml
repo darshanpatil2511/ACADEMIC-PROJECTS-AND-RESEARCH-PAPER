@@ -25,6 +25,11 @@ targets:
       - path: App
         excludes:
           - "**/.gitkeep"
+          - "Resources/BenchImages"
+      # Folder reference: the benchmark finds its photos under BenchImages/ in the app bundle.
+      - path: App/Resources/BenchImages
+        type: folder
+        buildPhase: resources
     dependencies:
       - package: CurbCore
         product: CurbCore

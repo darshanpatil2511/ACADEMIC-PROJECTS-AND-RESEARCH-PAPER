@@ -1,0 +1,28 @@
+# CurbLens: run the CurbCore package tests on every push and pull request that touches the project.
+# Vision photo tests are skipped (SKIP_VISION=1): CI runners have no warm Vision models and no GPU.
+name: CurbLens CI
+
+on:
+  push:
+    paths:
+      - "Curb Lens/**"
+      - ".github/workflows/curblens-ci.yml"
+  pull_request:
+    paths:
+      - "Curb Lens/**"
+      - ".github/workflows/curblens-ci.yml"
+
+jobs:
+  test:
+    runs-on: macos-latest
+    defaults:
+      run:
+        working-directory: "Curb Lens"
+    steps:
+      - uses: actions/checkout@v4
+      - name: Toolchain
+        run: swift --version
+      - name: CurbCore tests
+        env:
+          SKIP_VISION: "1"
+        run: swift test --package-path CurbCore
