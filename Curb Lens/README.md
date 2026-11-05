@@ -12,6 +12,7 @@
   <img src="https://img.shields.io/badge/iOS-17%2B-blue" alt="iOS 17+">
   <img src="https://img.shields.io/badge/runs-100%25%20on--device-green" alt="On-device">
   <img src="https://img.shields.io/badge/cost-%240-brightgreen" alt="$0">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-lightgrey" alt="MIT license"></a>
 </p>
 
 ---
@@ -243,6 +244,11 @@ which can be published with the repo.
 - A small Core ML classifier for sign types and arrows, keeping the rule parser for the text
 - Apple's on-device Foundation Models for free-form signs the parser can't cover
 - Holiday calendar and permit-zone settings, so permit holders get exact verdicts
+
+## License
+
+The code is released under the [MIT License](LICENSE). It covers the source code and labels in this
+folder, not the third-party sign photos used locally during development (they aren't included here).
 
 ---
 
