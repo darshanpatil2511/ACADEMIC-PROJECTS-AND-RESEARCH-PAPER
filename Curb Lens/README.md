@@ -25,8 +25,6 @@ you before you have to move.
 
 Everything runs **on the phone**: no server, no account, no network call, no paid API.
 
-> **Demo:** *20-second screen recording goes here (`docs/demo.gif`).*
-
 ## Highlights
 
 | | |
