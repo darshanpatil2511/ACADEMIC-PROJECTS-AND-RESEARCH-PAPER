@@ -110,15 +110,20 @@ final class BenchmarkModel {
         return files.filter { types.contains($0.pathExtension.lowercased()) }.sorted { $0.lastPathComponent < $1.lastPathComponent }
     }()
 
-    /// e.g. "iPhone18,1 · iOS 27.0"
+    /// e.g. "iPhone 17 Pro (iPhone18,1) · iOS 27.0"
     let device: String = {
         var info = utsname()
         uname(&info)
         let machine = withUnsafeBytes(of: &info.machine) { raw in
             String(decoding: raw.prefix(while: { $0 != 0 }), as: UTF8.self)
         }
-        return "\(machine) · iOS \(UIDevice.current.systemVersion)"
+        let name = marketingNames[machine].map { "\($0) (\(machine))" } ?? machine
+        return "\(name) · iOS \(UIDevice.current.systemVersion)"
     }()
+
+    /// iOS reports a hardware code, which runs one number ahead of the marketing name.
+    /// Only codes confirmed against Xcode's device list; others show the raw code.
+    private static let marketingNames = ["iPhone18,1": "iPhone 17 Pro"]
 
     func run() async {
         guard !running, let first = imageURLs.first else { return }
