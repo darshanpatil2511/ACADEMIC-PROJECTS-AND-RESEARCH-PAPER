@@ -15,3 +15,15 @@ Package.resolved.bak
 
 # Sign photos used locally until replaced by our own (copyright unclear)
 CurbCore/Tests/CurbCoreTests/Fixtures/images/*.jp*g
+
+# Copies of those same photos in the dataset and the on-device benchmark (keep local)
+Dataset/images/commercial_vehicles_tow_zone.jpeg
+Dataset/images/meter_pickup_dropoff_pole.jpeg
+Dataset/images/resident_permit_only.jpeg
+Dataset/images/south_end_2hr_street_cleaning_snow.jpeg
+Dataset/images/two_hr_except_sundays_glare.jpeg
+App/Resources/BenchImages/*.jp*g
+
+# Web/stock images used only to develop the parser (not ours to publish), and the drop folder for new photos
+Dataset-web/
+Dataset/inbox/

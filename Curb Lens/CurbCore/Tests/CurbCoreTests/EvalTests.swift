@@ -47,7 +47,8 @@ struct EvalMetricsTests {
         copy.sourceText = "different OCR text"
         #expect(EvalMetrics.rulesMatchExactly(expected: [twoHour, cleaning], got: [copy, twoHour]))
         #expect(!EvalMetrics.rulesMatchExactly(expected: [twoHour, cleaning], got: [twoHour]))
-        #expect(!EvalMetrics.rulesMatchExactly(expected: [twoHour], got: [twoHour, twoHour]))
+        // Two identical signs on one pole ("NO PARKING ANY TIME" twice) mean the same thing as one.
+        #expect(EvalMetrics.rulesMatchExactly(expected: [twoHour], got: [twoHour, twoHour]))
     }
 
     @Test func fieldHitsPairEachExpectedRuleWithItsClosestGuess() {
@@ -100,6 +101,15 @@ struct EvalScorerTests {
         let failed = ReadingSummary(detected: false, panels: [], rules: [], timings: nil, error: "boom")
         let score = try EvalScorer.score(label: l, reading: failed, calendar: cal)
         #expect(score.error == "boom" && !score.exactMatch && score.checksPassed == 0)
+    }
+
+    @Test func readErrorNeverPassesEvenWhenNothingIsExpected() throws {
+        // A private-lot sign labelled with no rules: an error also yields no rules, but must not count as a pass.
+        let l = label(rules: [], checks: [EvalCheck(at: "2026-11-04T10:00", expect: .unreadable)])
+        let failed = ReadingSummary(detected: false, panels: [], rules: [], timings: nil, error: "boom")
+        let score = try EvalScorer.score(label: l, reading: failed, calendar: cal)
+        #expect(!score.exactMatch && score.checksPassed == 0)
+        #expect(score.failedChecks == ["2026-11-04T10:00: read error"])
     }
 
     @Test func labelProblemsCatchChecksTheLabelledRulesContradict() throws {

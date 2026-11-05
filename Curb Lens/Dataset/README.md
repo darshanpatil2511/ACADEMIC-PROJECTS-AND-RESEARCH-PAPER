@@ -9,7 +9,13 @@ Dataset/
 ```
 
 The first 5 entries are the parser's test fixtures. They are in the **dev** split because the parser
-was tuned on them.
+was tuned on them. Their photos come from the web and stay local (git-ignored), so on a fresh clone
+those 5 entries report a read error.
+
+Only commit photos you took yourself. Web or stock images go in `Dataset-web/` (git-ignored, same
+format) and are scored with `curbeval eval --dataset Dataset-web --out Dataset-web/reports`. They help
+develop the parser but never count toward reported results. New photos can be dropped in
+`Dataset/inbox/` (also git-ignored) before they are labelled.
 
 ## Taking the photos
 

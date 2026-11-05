@@ -62,7 +62,14 @@ public enum EvalScorer {
     public static func score(label: EvalLabel, reading: ReadingSummary, calendar: Calendar) throws -> ImageScore {
         var passed = 0
         var failed: [String] = []
+        // A failed read is a failure, even for labels that expect no rules (it also yields no rules).
+        let readFailed = reading.error != nil
         for check in label.checks {
+            if readFailed {
+                _ = try check.date(calendar: calendar)
+                failed.append("\(check.at): read error")
+                continue
+            }
             let verdict = RuleEngine.evaluate(rules: reading.rules, arrival: try check.date(calendar: calendar),
                                               calendar: calendar, permitZone: nil)
             let got = VerdictKind(verdict)
@@ -78,7 +85,7 @@ public enum EvalScorer {
             image: label.image, split: label.split, conditions: label.conditions,
             detected: reading.detected, usedFallback: reading.usedFallback,
             cer: EvalMetrics.characterErrorRate(expected: label.transcript, got: transcript),
-            exactMatch: EvalMetrics.rulesMatchExactly(expected: label.rules, got: reading.rules),
+            exactMatch: !readFailed && EvalMetrics.rulesMatchExactly(expected: label.rules, got: reading.rules),
             fieldHits: Dictionary(uniqueKeysWithValues: hits.map { ($0.key.rawValue, $0.value) }),
             expectedRuleCount: label.rules.count, gotRuleCount: reading.rules.count,
             extraRules: max(0, reading.rules.count - label.rules.count),

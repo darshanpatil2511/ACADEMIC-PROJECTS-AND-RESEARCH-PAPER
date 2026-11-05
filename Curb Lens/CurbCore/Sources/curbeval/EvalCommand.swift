@@ -117,6 +117,11 @@ enum EvalRunner {
             print(String(format: "[%3d/%d] %@ %@  checks %d/%d", index + 1, labels.count, mark, label.image,
                          score.checksPassed, score.checksTotal))
         }
+        let errors = scores.filter { $0.error != nil }.count
+        if errors > 0 {
+            print("\nWARNING: \(errors) of \(scores.count) photos failed to read; they count as failures. "
+                  + "If every photo fails with e5rtError, Vision's model service is stuck: wait a minute or restart the Mac, then rerun.")
+        }
         return EvalResult(config: options.summary, split: data.split.rawValue, generatedAt: stamp.display, scores: scores)
     }
 

@@ -48,13 +48,10 @@ public enum EvalMetrics {
         return Double(editDistance(truth, normalizeTranscript(got))) / Double(truth.count)
     }
 
-    /// Same rules (ignoring where the text came from), in any order, with the same multiplicity.
+    /// Same distinct rules (ignoring where the text came from), in any order. Duplicates don't count:
+    /// two identical signs on a pole give the same verdict as one.
     public static func rulesMatchExactly(expected: [ParkingRule], got: [ParkingRule]) -> Bool {
-        counts(expected) == counts(got)
-    }
-
-    private static func counts(_ rules: [ParkingRule]) -> [ParkingRule: Int] {
-        rules.reduce(into: [:]) { $0[$1.withoutSource, default: 0] += 1 }
+        Set(expected.map(\.withoutSource)) == Set(got.map(\.withoutSource))
     }
 
     /// For each field, how many expected rules got it right. Each expected rule is paired with the unused
