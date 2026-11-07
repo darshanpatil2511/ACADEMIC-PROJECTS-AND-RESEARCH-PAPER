@@ -239,3 +239,70 @@ every bar; 604,800 rows in `prices.csv`.
 **Likely questions:** what partial aggregation does to shuffle size; why a window without
 `partitionBy` is dangerous on big data; VWAP vs TWAP; why log returns and not simple
 returns; what realized volatility estimates.
+
+## Phase 5 — Replay driver, fills, benchmark v1
+
+**What exists**
+- `Rng` (`rng.hpp`): xoshiro256** + hand-written uniform/normal/lognormal/geometric.
+- `parsePrices` / `parseTrades` (`market_data.cpp`): `std::from_chars` CSV parsing with
+  line-numbered errors.
+- `buildStream` (`generator.cpp`): real taker flow + seeded synthetic makers → one
+  time-ordered vector of 40-byte `Event`s.
+- `replay` / `apply` (`replay.hpp`): templates over the book type, so v2 reuses them.
+- `tickscope_replay`: writes `data/fills.csv`, prints flow stats, runs the benchmark.
+- `tickscope_bench`: Google Benchmark microbenchmarks (add+cancel, add+fill, synthetic replay).
+- 7 new tests (parsing, RNG moments, generator determinism/ordering/pricing, quantity
+  conservation in replay). Results in `docs/bench.md`.
+
+**Headline (v1, Nov 5 flow, 13.6M events):** 29.5M events/s median throughput; p99
+125 ns to rest a limit or cancel, 208–417 ns for orders that trade.
+
+**Decisions to be able to explain**
+
+1. **Replay model.** Real trades are the aggressive side: `isBuyerMaker` gives the taker
+   side, so each trade becomes a market order (20%) or an IOC limited to the real price
+   ± 0.50 USDT (80%). Makers are synthetic: each second they quote around the *previous*
+   second's price (no look-ahead) with random sizes and distances, and cancel at random.
+   So the results describe "a simulated book absorbing real order flow".
+
+2. **Open-loop generator.** The stream is built before the replay and does not react to
+   fills. That makes it identical for v1 and v2 (fair benchmark) and separates generation
+   cost from engine cost. Consequence: some cancels target already-filled orders (71% on
+   this run) — the engine reports a miss, like a real cancel/fill race.
+
+3. **Own RNG and distributions.** `std::*_distribution` algorithms are implementation-
+   defined, so the same seed gives different streams on macOS (libc++) and Linux
+   (libstdc++). Writing them by hand (Box-Muller, inverse-CDF geometric) makes the seeded
+   stream identical everywhere.
+
+4. **Throughput vs latency runs are separate.** Timing every op adds two clock reads per
+   op and perturbs the thing measured; throughput runs time only the whole replay.
+   Fresh book per run, destroyed outside the timed region; one warm-up run first.
+
+5. **Timer resolution.** Apple Silicon's `steady_clock` is a 24 MHz counter: 41.67 ns per
+   tick. Most ops finish within one tick, so p50 reads 0 or 41 — quantization, not a
+   measurement. We report it as "<41 ns" and rely on p99/p99.9. On x86 Linux, `rdtsc` or
+   `clock_gettime` gives ~ns resolution; batched timing (time N ops, divide) is the other
+   fix, but it averages away tail latency.
+
+6. **Percentiles, not means.** Latency distributions are skewed; the mean hides the tail
+   that matters for a trading system. p99.9 and max show preemption outliers (33–68 µs
+   max on a non-isolated laptop core).
+
+7. **Fills into a reused vector, CSV via `to_chars`.** No allocation per event on the hot
+   path; output formatting avoids `printf` format parsing per field. Writing 6.4M fills
+   costs ~0.75 s on top of the ~0.46 s replay.
+
+8. **What the microbenchmarks show.** Add+cancel goes from 61.6 ns at 10 levels to 83.8 ns
+   at 1,000 levels per side: `std::map` insert is O(log L) and each tree level is a
+   pointer dereference into a separately allocated node (cache miss risk). That is the
+   target for Phase 6.
+
+**Simulation outcome:** market orders filled 53.4% by quantity, IOC 27.6%; the book is thin
+(385 orders at end of day) relative to heavy-tailed real flow (max trade 71.9 BTC). The
+generator parameters are CLI flags (`--adds-per-sec`, `--size-median`, `--lifetime`, ...)
+for sensitivity runs.
+
+**Likely questions:** why the stream is pre-generated; how you measured latency and what
+the timer resolution means; why p99 not mean; what "29.5M events/s" includes (matching,
+cancels, fill vector writes; not parsing or I/O); what a cancel/fill race is.

@@ -26,7 +26,8 @@ Full plan: `docs/PLAN.md`. Interview notes: `docs/notes.md`. Benchmarks: `docs/b
 ## C++ conventions
 - C++20, `-Wall -Wextra -Wpedantic -Werror` on project targets.
 - Debug builds use ASan + UBSan (`-DTICKSCOPE_SANITIZE=ON`); TSan for concurrency.
-- Benchmarks: Release `-O2`; `-O3 -mcpu=native` reported separately (Apple Silicon).
+- Benchmarks: Release (CMake default `-O3 -DNDEBUG`); `-mcpu=native` reported separately.
+- Record every benchmark run in `docs/bench.md` + raw JSON in `results/`.
 - No raw `new`/`delete`; RAII everywhere.
 - Prices are int64 ticks (0.01 USDT), quantities are int64 lots (1e-5 BTC). Never double.
 - Header-only templates live in `include/tickscope/`.
@@ -39,6 +40,8 @@ Full plan: `docs/PLAN.md`. Interview notes: `docs/notes.md`. Benchmarks: `docs/b
 ## Commands (run from TickScope/)
 - Engine:  `cmake -S engine -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DTICKSCOPE_SANITIZE=ON && cmake --build build && ctest --test-dir build --output-on-failure`
 - Bench:   `cmake -S engine -B build-rel -G Ninja -DCMAKE_BUILD_TYPE=Release && cmake --build build-rel && ./build-rel/bench/tickscope_bench --benchmark_repetitions=5`
+- Replay:  `./build-rel/tickscope_replay --prices data/prices.csv --trades data/trades.csv [--fills data/fills.csv] [--reps 5 --json results/bench_v1.json]`
+- Features: `cd analytics && sbt "runMain tickscope.features.FeatureJob --clean ../data/clean --out ../data/features --prices ../data/prices.csv"`
 - Spark:   `cd analytics && sbt test` (forked JVM auto-uses Java 17: `$TICKSCOPE_JAVA_HOME` or Homebrew openjdk@17)
 - Data:    `scripts/download.sh 7` → `data/raw/*.csv.gz` (disk is tight: keep gzip, never unzip)
 - Ingest:  `cd analytics && sbt "runMain tickscope.ingest.IngestJob --raw ../data/raw --out ../data/clean"`

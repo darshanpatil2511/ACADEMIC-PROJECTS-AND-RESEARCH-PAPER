@@ -57,9 +57,18 @@ endif()
 # ---- Engine library ---------------------------------------------------------
 add_library(tickscope_core STATIC
   src/order_book.cpp
+  src/market_data.cpp
+  src/generator.cpp
 )
 target_include_directories(tickscope_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_link_libraries(tickscope_core PUBLIC tickscope_options)
+
+# ---- Replay driver / end-to-end benchmark ------------------------------------
+add_executable(tickscope_replay src/main.cpp)
+target_link_libraries(tickscope_replay PRIVATE tickscope_core)
+string(TOUPPER "${CMAKE_BUILD_TYPE}" _bt)
+target_compile_definitions(tickscope_replay PRIVATE
+  TICKSCOPE_BUILD_INFO="${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION} ${CMAKE_BUILD_TYPE} ${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_${_bt}}")
 
 # ---- Tests and benchmarks ---------------------------------------------------
 enable_testing()
