@@ -57,6 +57,7 @@ endif()
 # ---- Engine library ---------------------------------------------------------
 add_library(tickscope_core STATIC
   src/order_book.cpp
+  src/order_book_v2.cpp
   src/market_data.cpp
   src/generator.cpp
 )

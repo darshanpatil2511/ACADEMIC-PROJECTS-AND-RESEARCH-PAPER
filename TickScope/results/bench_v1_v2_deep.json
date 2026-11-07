@@ -1,0 +1,40 @@
+{
+  "scenario": "deep",
+  "build": "AppleClang 21.0.0.21000334 Release  -O3 -DNDEBUG",
+  "seed": 42,
+  "generator": {"addsPerSidePerSec": 50.0, "sizeMedianLots": 200.0, "offsetMeanTicks": 50.0, "lifetimeSec": 600.0, "marketShare": 0.2},
+  "events": 22149786,
+  "realTrades": 4929786,
+  "fills": 11230290,
+  "avgRestingOrders": 5723.2,
+  "avgLevels": 2214.8,
+  "reps": 5,
+  "timerOverheadNs": 0.0,
+  "timerResolutionNs": 41.0,
+  "engines": {
+    "v1": {
+      "throughputEventsPerSec": 22410346.4,
+      "throughputRuns": [22286167.1, 22410346.4, 22523029.2, 22441247.3, 22262666.1],
+      "latencyNs": {
+        "limit_rest": {"count": 5637876, "p50": 83.0, "p99": 167.0, "p999": 209.0, "max": 85500.0},
+        "limit_cross": {"count": 3002124, "p50": 41.0, "p99": 583.0, "p999": 1625.0, "max": 59583.0},
+        "market": {"count": 984534, "p50": 41.0, "p99": 708.0, "p999": 3208.0, "max": 38292.0},
+        "ioc": {"count": 3945252, "p50": 0.0, "p99": 291.0, "p999": 1833.0, "max": 40750.0},
+        "cancel_hit": {"count": 890138, "p50": 42.0, "p99": 209.0, "p999": 292.0, "max": 34042.0},
+        "cancel_miss": {"count": 7689862, "p50": 0.0, "p99": 42.0, "p999": 83.0, "max": 40000.0}
+      }
+    },
+    "v2": {
+      "throughputEventsPerSec": 49375757.9,
+      "throughputRuns": [49800409.0, 49798533.6, 49373969.4, 49375757.9, 49090230.3],
+      "latencyNs": {
+        "limit_rest": {"count": 5637876, "p50": 41.0, "p99": 83.0, "p999": 125.0, "max": 50208.0},
+        "limit_cross": {"count": 3002124, "p50": 41.0, "p99": 250.0, "p999": 625.0, "max": 65916.0},
+        "market": {"count": 984534, "p50": 41.0, "p99": 250.0, "p999": 1208.0, "max": 20791.0},
+        "ioc": {"count": 3945252, "p50": 41.0, "p99": 125.0, "p999": 667.0, "max": 41292.0},
+        "cancel_hit": {"count": 890138, "p50": 41.0, "p99": 125.0, "p999": 208.0, "max": 23166.0},
+        "cancel_miss": {"count": 7689862, "p50": 0.0, "p99": 42.0, "p999": 42.0, "max": 45291.0}
+      }
+    }
+  }
+}

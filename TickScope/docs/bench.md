@@ -76,3 +76,64 @@ IOC 27.60%, synthetic limits (as takers) 19.13%. Cancels found a resting order 2
 the time (the rest raced a fill). 385 orders resting at end of day (72 bid levels, 47 ask
 levels): the synthetic book is thin relative to the heavy-tailed real flow (p99 trade
 13,127 lots, max 7,190,419 lots = 71.9 BTC), so large orders sweep it.
+
+---
+
+## 2026-11-07 — Engine v1 vs v2 (flat array + pool), same stream, same machine
+
+v2 = flat price-level array over a 65,536-tick band with a two-level bitmap, out-of-band
+fallback `std::map` with recentering, preallocated order pool with free list, intrusive
+per-level FIFO, open-addressing id map. Same build (`-O3 -DNDEBUG`), same seeded stream,
+same method as above (1 warm-up, 5 throughput + 5 latency runs per engine, medians).
+
+**Correctness gate before timing:** both engines replay the full stream untimed and every
+fill is hashed (FNV-1a over all fields, in order). Both scenarios: **identical** fill
+streams (shallow: 6,406,577 fills, hash `5814cc944bcf593f`; deep: 11,230,290 fills, hash
+`d1e1038c4610b475`).
+
+### Scenario "shallow-default" (generator defaults, as in the v1 run above)
+`--engine both --reps 5 --scenario shallow-default` → `results/bench_v1_v2_shallow.json`
+Stream 13,568,286 events; book depth avg 385 orders / 91 levels (max 1,473 / 212).
+
+| Engine | Throughput runs (events/s) | Median |
+|---|---|---|
+| v1 | 29,501,167 · 29,530,239 · 29,542,809 · 26,554,599 · 29,521,474 | 29,521,474 |
+| v2 | 52,020,833 · 52,025,562 · 51,888,405 · 51,928,842 · 52,153,395 | **52,020,833** |
+| | | **v2/v1 = 1.76×** |
+
+### Scenario "deep" (`--adds-per-sec 50 --lifetime 600 --offset-mean 50`)
+→ `results/bench_v1_v2_deep.json`. Stream 22,149,786 events; book depth avg 5,723 orders
+/ 2,215 levels (max 22,626 / 4,335).
+
+| Engine | Throughput runs (events/s) | Median |
+|---|---|---|
+| v1 | 22,286,167 · 22,410,346 · 22,523,029 · 22,441,247 · 22,262,666 | 22,410,346 |
+| v2 | 49,800,409 · 49,798,534 · 49,373,969 · 49,375,758 · 49,090,230 | **49,375,758** |
+| | | **v2/v1 = 2.20×** |
+
+v1 loses 24% throughput going from the shallow to the deep book; v2 loses 5%.
+
+### p99 latency (ns; 41 ns timer resolution — see the note in the v1 section)
+| Op | v1 shallow | v2 shallow | v1 deep | v2 deep |
+|---|---|---|---|---|
+| limit_rest | 125 | 42 | 167 | 83 |
+| limit_cross | 417 | 167 | 583 | 250 |
+| market | 375 | 167 | 708 | 250 |
+| ioc | 208 | 84 | 291 | 125 |
+| cancel_hit | 125 | 42 | 209 | 125 |
+| cancel_miss | 42 | 42 | 42 | 42 |
+
+p99.9 (deep): market 3,208 → 1,208; limit_cross 1,625 → 625; ioc 1,833 → 667.
+p50 is below timer resolution for both engines (reported as <41 ns).
+
+### Microbenchmarks (Google Benchmark, 5 repetitions, median) → `results/microbench_v1_v2.json`
+| Benchmark | v1 | v2 | Speedup |
+|---|---|---|---|
+| AddCancel, 10 levels/side | 61.3 ns | 18.5 ns | 3.3× |
+| AddCancel, 1,000 levels/side | 84.7 ns | 19.0 ns | 4.5× |
+| AddAndFill, 10 levels/side | 84.4 ns | 27.0 ns | 3.1× |
+| AddAndFill, 1,000 levels/side | 84.2 ns | 27.5 ns | 3.1× |
+| ReplaySynthetic (~537k events) | 21.9 ms | 11.9 ms | 1.8× |
+
+v1 add+cancel cost grows with depth (61 → 85 ns, the O(log L) tree insert); v2 is flat
+(18.5 → 19.0 ns): the level is an array index.

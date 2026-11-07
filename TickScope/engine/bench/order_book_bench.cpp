@@ -3,10 +3,12 @@
 
 #include <benchmark/benchmark.h>
 
+#include <memory>
 #include <vector>
 
 #include "tickscope/generator.hpp"
 #include "tickscope/order_book.hpp"
+#include "tickscope/order_book_v2.hpp"
 #include "tickscope/replay.hpp"
 #include "tickscope/rng.hpp"
 
@@ -82,15 +84,23 @@ template <class Book>
 void BM_ReplaySynthetic(benchmark::State& state) {
   static const std::vector<Event> events = syntheticStream();
   for (auto _ : state) {
-    Book book;
-    auto s = replay(book, events, [](const Event&, const std::vector<Fill>&) {});
+    state.PauseTiming();  // book construction/destruction is not what we measure
+    auto book = std::make_unique<Book>();
+    state.ResumeTiming();
+    auto s = replay(*book, events, [](const Event&, const std::vector<Fill>&) {});
     benchmark::DoNotOptimize(s.fills);
+    state.PauseTiming();
+    book.reset();
+    state.ResumeTiming();
   }
   state.SetItemsProcessed(state.iterations() * static_cast<std::int64_t>(events.size()));
 }
 
 BENCHMARK(BM_AddCancel<OrderBook>)->Name("v1/AddCancel")->Arg(10)->Arg(1000);
+BENCHMARK(BM_AddCancel<OrderBookV2>)->Name("v2/AddCancel")->Arg(10)->Arg(1000);
 BENCHMARK(BM_AddAndFill<OrderBook>)->Name("v1/AddAndFill")->Arg(10)->Arg(1000);
+BENCHMARK(BM_AddAndFill<OrderBookV2>)->Name("v2/AddAndFill")->Arg(10)->Arg(1000);
 BENCHMARK(BM_ReplaySynthetic<OrderBook>)->Name("v1/ReplaySynthetic")->Unit(benchmark::kMillisecond);
+BENCHMARK(BM_ReplaySynthetic<OrderBookV2>)->Name("v2/ReplaySynthetic")->Unit(benchmark::kMillisecond);
 
 }  // namespace

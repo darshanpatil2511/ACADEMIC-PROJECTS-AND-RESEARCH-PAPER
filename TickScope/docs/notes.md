@@ -101,7 +101,7 @@ parallelism; how `partitionBy` on write lays out directories and enables pruning
 ## Phase 4 — Order book v1
 
 **What exists:** `OrderBook` (`include/tickscope/order_book.hpp`, `src/order_book.cpp`) with
-`addLimit`, `addMarket`, `addIoc`, `cancel`, `amend`, `bestBid`, `bestAsk`; 23 unit tests
+`addLimit`, `addMarket`, `addIoc`, `cancel`, `amend`, `bestBid`, `bestAsk`; 21 unit tests (each now run on both books)
 and a differential test against a naive reference book (3 seeds × 20,000 random ops,
 every report, fill and best price compared after each op). All pass under ASan + UBSan.
 A deliberately planted FIFO bug was caught by the differential test within 33–42 ops.
@@ -306,3 +306,85 @@ for sensitivity runs.
 **Likely questions:** why the stream is pre-generated; how you measured latency and what
 the timer resolution means; why p99 not mean; what "29.5M events/s" includes (matching,
 cancels, fill vector writes; not parsing or I/O); what a cancel/fill race is.
+
+## Phase 6 — Order book v2 (optimization pass)
+
+**What exists:** `OrderBookV2` (`order_book_v2.hpp/.cpp`) with the same interface and
+identical results as v1; `IdMap` and `LevelBitmap` (`flat_structures.hpp`). The 21 book
+tests are now typed tests run on both books; differential tests run v2 against the
+reference (normal and tiny-band/drifting modes); v2-specific tests cover the id map
+(vs `std::unordered_map`), the bitmap (vs `std::set`), pool reuse, the fallback and
+recentering; the replay binary refuses to report a speedup unless v1 and v2 fill streams
+hash identically. 62 tests total, all under ASan/UBSan.
+
+**Headline:** 52.0M vs 29.5M events/s (**1.76×**) on the default stream; **2.20×** on a
+deep book (avg 2,215 levels), where v1 drops 24% and v2 only 5%. Add+cancel 61–85 ns → 19 ns.
+
+**Memory layout, v1 vs v2**
+```
+v1: map node ─► Level ─► list node ─► list node ─► ...    (every box: separate malloc)
+    unordered_map bucket ─► node {id, list iterator}       (another malloc per order)
+
+v2: levels_[price - base]   contiguous array, 24 B per level, 65,536 per side
+    bitmap words_ + summary_ one bit per level, one bit per 64 levels
+    nodes_[i]               contiguous pool, 48 B per order; prev/next are uint32 indices
+    IdMap slots_[]          contiguous, 16 B per slot, load factor <= 0.5
+```
+
+**Where v1 spent its time and what v2 changed**
+
+1. **Allocation per order.** v1 does a `malloc` for each list node and each hash node, and
+   a `free` when it leaves. v2 takes nodes from a preallocated pool and returns them to a
+   free list threaded through the same `next` field: two loads and a store. Test: 100k
+   add/cancel cycles use exactly one pool node.
+
+2. **Pointer chasing.** Reaching a level in v1 walks a red-black tree: ~log2(L)
+   dependent loads to scattered nodes, each a likely cache miss (11 levels deep at 2,000
+   levels). In v2 it is `levels_[price - base]`: one address computation. That is why
+   v1's add+cancel grows with depth (61 → 85 ns) and v2's does not (18.5 → 19.0 ns).
+
+3. **Finding the next best level.** v1: `begin()` of the map (cached, O(1)), but erasing
+   the emptied level rebalances the tree. v2: the bitmap; `highest()`/`lowest()` read at
+   most N/4096 summary words (16 for N = 65,536) and one word, using `countl_zero` /
+   `countr_zero` (single instructions). Erasing a level is clearing a bit.
+
+4. **Hash map.** `std::unordered_map` is a vector of buckets pointing to linked nodes.
+   `IdMap` is one array; lookup = multiply-shift hash + short linear scan, usually in one
+   cache line. Deletion by backward shift keeps probe runs short forever (tombstones would
+   accumulate under add/cancel churn).
+
+5. **Indices instead of pointers.** 32-bit indices halve link size versus pointers and stay
+   valid if the pool vector grows (pointers would dangle on reallocation).
+
+**The bounded band, and the two edge cases interviewers ask about**
+
+- BTC is ~7.6M ticks from zero, and moved ~440k ticks on 2026-11-05, so one array cannot
+  cover every price. The band is 65,536 ticks ($655) per side; outside it, levels live in
+  a fallback `std::map`.
+- **Out-of-band orders** go to the fallback. Matching takes the better of "best in band"
+  and "best in fallback", so they trade in correct price-time order.
+- **Recentering:** when an out-of-band order would become the best price on its side (the
+  market has moved), the band recenters on it: band levels move to the fallback if they
+  fall outside, fallback levels move into the array if they fall inside. Levels are moved
+  by value; orders point to pool indices, never to level addresses, so nothing else
+  changes. Cost O(levels moved), rare (BTC needs to move $327 from the centre).
+
+**Testing story (good to tell):** mutation testing found a gap. Breaking "pull fallback
+levels into the band on recenter" left all 61 tests green: the random streams never
+emptied a band side while fallback levels sat just outside it. A targeted test for that
+sequence now fails (UBSan null-reference) when the bug is planted. Lesson: random
+differential testing is strong but not exhaustive; mutation testing shows what it misses.
+
+**Trade-offs and limitations**
+- Fixed memory per side: 65,536 × 24 B = 1.5 MB of levels + 8 KB bitmap, whether used or
+  not. Fine for one instrument; for thousands of instruments you would size bands per
+  instrument or use a sparse structure.
+- A pathological market that oscillates across the band edge would recenter often; a
+  hysteresis margin would fix it.
+- The pool still grows (vector doubling) if more orders rest than were reserved; growth
+  is amortized and indices stay valid.
+
+**Likely questions:** what exactly made v2 faster (allocations, pointer chasing, cache
+lines); why indices not pointers; how the bitmap finds the best level; how you handle
+prices outside the array; how you proved v2 is correct (typed tests, differential vs
+reference, identical-fill hash on 13.6M and 22.1M real events, mutation testing).
