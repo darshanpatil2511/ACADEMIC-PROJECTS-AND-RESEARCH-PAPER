@@ -40,3 +40,6 @@ Full plan: `docs/PLAN.md`. Interview notes: `docs/notes.md`. Benchmarks: `docs/b
 - Engine:  `cmake -S engine -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DTICKSCOPE_SANITIZE=ON && cmake --build build && ctest --test-dir build --output-on-failure`
 - Bench:   `cmake -S engine -B build-rel -G Ninja -DCMAKE_BUILD_TYPE=Release && cmake --build build-rel && ./build-rel/bench/tickscope_bench --benchmark_repetitions=5`
 - Spark:   `cd analytics && sbt test` (forked JVM auto-uses Java 17: `$TICKSCOPE_JAVA_HOME` or Homebrew openjdk@17)
+- Data:    `scripts/download.sh 7` → `data/raw/*.csv.gz` (disk is tight: keep gzip, never unzip)
+- Ingest:  `cd analytics && sbt "runMain tickscope.ingest.IngestJob --raw ../data/raw --out ../data/clean"`
+- Export:  `cd analytics && sbt "runMain tickscope.ingest.ExportTrades --clean ../data/clean --out ../data/trades.csv --from YYYY-MM-DD --to YYYY-MM-DD"`
