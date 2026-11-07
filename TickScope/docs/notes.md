@@ -97,3 +97,88 @@ fixture test is what proves each rule works.
 **Likely questions:** why not `dropDuplicates` (it keeps an arbitrary row; `row_number`
 ordered by time is deterministic); narrow vs wide transformations; why gzip limits
 parallelism; how `partitionBy` on write lays out directories and enables pruning later.
+
+## Phase 4 — Order book v1
+
+**What exists:** `OrderBook` (`include/tickscope/order_book.hpp`, `src/order_book.cpp`) with
+`addLimit`, `addMarket`, `addIoc`, `cancel`, `amend`, `bestBid`, `bestAsk`; 23 unit tests
+and a differential test against a naive reference book (3 seeds × 20,000 random ops,
+every report, fill and best price compared after each op). All pass under ASan + UBSan.
+A deliberately planted FIFO bug was caught by the differential test within 33–42 ops.
+
+**Data structures and memory layout**
+```
+bids_: std::map<price, Level, greater>   asks_: std::map<price, Level, less>
+          │ red-black tree node per price level (heap-allocated)
+          ▼
+Level { std::list<Order> orders; int64 total; }
+          │ doubly linked list node per order (heap-allocated)
+          ▼
+Order { id, side, price, qty, ts }
+
+index_: std::unordered_map<OrderId, Locator{list iterator, Level*}>
+```
+Every level and every order is a separate heap node, so walking the book is pointer
+chasing with poor cache locality. That is the cost Phase 6 removes.
+
+**Complexity** (L = levels on a side, F = fills produced)
+
+| Operation | Cost | Why |
+|---|---|---|
+| bestBid / bestAsk | O(1) | `begin()` of a map (cached leftmost node) |
+| addLimit, no cross | O(log L) | map lookup/insert of the level; list push_back O(1) |
+| addLimit / IOC / market that trades | O(F + log L) | each fill O(1); emptied levels erased O(1) amortized from begin() |
+| cancel | O(1) avg | hash lookup + list unlink; + O(log L) only if the level empties |
+| amend, qty down same price | O(1) avg | edit in place, keep priority |
+| amend, price change / qty up | cancel + addLimit | loses priority |
+
+**Decisions to be able to explain**
+
+1. **Why `std::map` for levels.** Sorted, so the best price is `begin()`, and a sweep walks
+   levels in price order. Insert/erase of a level is O(log L). A sorted vector would give
+   better locality but O(L) inserts in the middle.
+
+2. **Why `std::list` per level and storing its iterator.** Price-time priority needs FIFO
+   at each price plus removal from the middle (cancels). A list gives O(1) push_back,
+   pop_front and erase-by-iterator, and its iterators stay valid until *that* node is
+   erased — inserting or erasing other nodes never invalidates them. A `std::vector` or
+   `std::deque` would invalidate stored positions on erase.
+
+3. **Why `Level*` is safe to store.** `std::map` is node-based: inserting or erasing other
+   levels never moves an existing node, so a pointer to a level's value stays valid until
+   that level is erased. The book erases a level only when it is empty, and an empty level
+   has no orders in `index_` pointing at it.
+
+4. **One matching loop for both sides.** `match` is a template over the ladder type; the
+   ladder's own comparator answers "does this level cross?" as `!comp(takerPrice, level)`
+   (asks: level ≤ limit; bids: level ≥ limit). A market order is a limit at INT64_MAX
+   (buy) or INT64_MIN (sell) that never rests. No duplicated buy/sell code.
+
+5. **Fills at the maker's price.** The resting order set the price; an aggressive buyer
+   at 105 against an ask at 100 trades at 100 (price improvement for the taker).
+
+6. **Amend rules.** Reducing size keeps queue priority (it cannot hurt anyone queued
+   behind). Increasing size or changing price is treated as a new order and goes to the
+   back of the queue — otherwise traders could reserve a queue spot with a tiny order and
+   enlarge it later. A price amend can cross and trade immediately.
+
+7. **What happens when a market order exceeds liquidity.** It sweeps every level on the
+   opposite side, then the remainder is discarded and reported (`discarded`), never
+   rested — a resting market order would have no price. Real venues often add price
+   protection bands; listed as a limitation.
+
+8. **Fills into a caller-owned vector.** Avoids allocating a new container per order on
+   the hot path; the caller can `clear()` and reuse capacity.
+
+9. **Differential testing.** A 150-line brute-force book (linear scans, explicit sequence
+   numbers for time priority) is easy to verify by reading. Random streams in a narrow
+   price band force crosses, partials, multi-level sweeps, cancels of filled ids and
+   amends. Any divergence fails with the exact op number. Phase 6 reuses it for v2.
+
+**Limitations:** single instrument; no FOK, stop or iceberg orders; no self-trade
+prevention; ids may be reused once an order leaves the book; no price bands.
+
+**Likely questions:** why cancel is O(1) and when it is not (level empties → map erase);
+what invalidates `std::list` iterators (only erasing that node); why `std::map` iterators
+and node pointers survive other inserts; what a crossed book is and why it can never
+persist here (an incoming order matches until it no longer crosses, and only then rests).

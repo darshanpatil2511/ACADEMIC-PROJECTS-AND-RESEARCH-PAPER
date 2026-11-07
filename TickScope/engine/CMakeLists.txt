@@ -55,9 +55,11 @@ if(TICKSCOPE_TSAN)
 endif()
 
 # ---- Engine library ---------------------------------------------------------
-add_library(tickscope_core INTERFACE)
-target_include_directories(tickscope_core INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include)
-target_link_libraries(tickscope_core INTERFACE tickscope_options)
+add_library(tickscope_core STATIC
+  src/order_book.cpp
+)
+target_include_directories(tickscope_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_link_libraries(tickscope_core PUBLIC tickscope_options)
 
 # ---- Tests and benchmarks ---------------------------------------------------
 enable_testing()
