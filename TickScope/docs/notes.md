@@ -388,3 +388,52 @@ differential testing is strong but not exhaustive; mutation testing shows what i
 lines); why indices not pointers; how the bitmap finds the best level; how you handle
 prices outside the array; how you proved v2 is correct (typed tests, differential vs
 reference, identical-fill hash on 13.6M and 22.1M real events, mutation testing).
+
+## Phase 3 — Statistics report
+
+**What exists:** `Stats` (moments, autocorrelation, predictive regression with naive and
+Newey-West t-stats) and `StatsJob` → `reports/stats.md` + `results/stats.json`. Spark
+aggregates and `lag`/`lead` windows only; the only collected rows are single aggregate
+rows and the 7-row daily table. 5 tests check every Spark number against a plain-array
+reference implementation (to 1e-9).
+
+**Findings on 2026-10-30 → 2026-11-05 (10,079 one-minute returns):**
+- Std dev of 1m log returns 5.59e-4 (~5.6 bp); skew −0.06; **excess kurtosis 11.47**;
+  82 moves beyond 4σ where a normal distribution predicts ~0.6.
+- Return autocorrelation lags 1–5: all within ±0.0195 except lag 2 (−0.0219, marginal;
+  ~0.25 false positives expected from 5 tests). Absolute-return autocorrelation 0.31–0.36
+  at every lag: **volatility clustering**.
+- Imbalance(t) → return(t+1): r = 0.0208 (0.04% of variance), slope 0.24 bp per unit of
+  imbalance, naive t = 2.09, **HAC t = 2.47 (11 lags)**: significant at 5%, economically tiny.
+
+**Decisions to be able to explain**
+
+1. **Fat tails / kurtosis.** Kurtosis measures tail weight relative to a normal. 11.47
+   excess means extreme minutes happen orders of magnitude more often than a Gaussian
+   model says (82 vs 0.6 beyond 4σ). VaR from a normal model understates risk; use
+   empirical quantiles, Student-t, or EVT.
+
+2. **Why the ±1.96/√n band.** Under no autocorrelation, the sample autocorrelation is
+   approximately N(0, 1/n). Testing 5 lags at 5% each expects 0.25 false positives, so
+   one marginal exceedance is weak evidence (multiple-testing caveat).
+
+3. **Volatility clustering.** Returns are nearly uncorrelated, |returns| strongly
+   correlated: direction is unpredictable, magnitude is predictable (the basis of GARCH).
+
+4. **Why HAC (Newey-West).** OLS standard errors assume independent, equal-variance
+   errors. Volatility clusters, so errors are heteroskedastic and possibly
+   autocorrelated, and naive t-stats can be wrong in either direction. Newey-West
+   estimates the long-run variance of (x − x̄)·e with Bartlett weights 1 − l/(L+1),
+   L = ⌊4(n/100)^(2/9)⌋ = 11. Here HAC t (2.47) > naive t (2.09): the correction is not
+   always conservative.
+
+5. **Significant vs useful.** r² = 0.04% and 0.24 bp per unit imbalance is far below
+   trading costs (BTC spread ~0.01 USDT ≈ 0.001 bp, but fees ~1–10 bp). Statistically
+   detectable, not tradable at this horizon.
+
+6. **No collect of the series.** `agg(...)` returns one row; `lag` windows run on
+   ~10k bars (single partition, acceptable at bar level, not at trade level).
+
+**Likely questions:** what kurtosis says about tail risk; what the imbalance correlation
+showed and whether it was significant (yes at 5% with HAC, but tiny); why HAC; why ACF
+of |r| differs from ACF of r.
