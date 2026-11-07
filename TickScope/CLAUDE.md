@@ -39,4 +39,4 @@ Full plan: `docs/PLAN.md`. Interview notes: `docs/notes.md`. Benchmarks: `docs/b
 ## Commands (run from TickScope/)
 - Engine:  `cmake -S engine -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DTICKSCOPE_SANITIZE=ON && cmake --build build && ctest --test-dir build --output-on-failure`
 - Bench:   `cmake -S engine -B build-rel -G Ninja -DCMAKE_BUILD_TYPE=Release && cmake --build build-rel && ./build-rel/bench/tickscope_bench --benchmark_repetitions=5`
-- Spark:   `cd analytics && JAVA_HOME=/opt/homebrew/opt/openjdk@17 sbt test`
+- Spark:   `cd analytics && sbt test` (forked JVM auto-uses Java 17: `$TICKSCOPE_JAVA_HOME` or Homebrew openjdk@17)

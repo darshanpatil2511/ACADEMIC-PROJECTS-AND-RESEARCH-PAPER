@@ -21,6 +21,13 @@ val sparkJavaOpens = Seq(
   "java.base/sun.util.calendar"
 ).map(p => s"--add-opens=$p=ALL-UNNAMED")
 
+// Spark 3.5 supports Java 8/11/17 only. sbt itself may run on any JDK; the forked JVM
+// that runs Spark (tests and `run`) uses Java 17, found in this order:
+// $TICKSCOPE_JAVA_HOME, Homebrew openjdk@17, else the JDK sbt runs on (CI sets up 17).
+val java17Home: Option[File] =
+  sys.env.get("TICKSCOPE_JAVA_HOME").map(file)
+    .orElse(Seq("/opt/homebrew/opt/openjdk@17", "/usr/local/opt/openjdk@17").map(file).find(_.exists))
+
 lazy val root = (project in file("."))
   .settings(
     name := "tickscope-analytics",
@@ -31,6 +38,7 @@ lazy val root = (project in file("."))
     ),
     scalacOptions ++= Seq("-deprecation", "-feature", "-unchecked", "-Xlint", "-Wunused"),
     fork := true,
+    javaHome := java17Home,
     javaOptions ++= sparkJavaOpens ++ Seq("-Xmx4g"),
     Test / parallelExecution := false,
     run / connectInput := true
