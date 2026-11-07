@@ -151,7 +151,7 @@ TEST(Replay, QuantityIsConservedAndFillsMatchReports) {
   QtyLots fillQty = 0;
   std::size_t fillCount = 0;
   std::set<OrderId> cancelled;
-  const ReplayStats s = replay(book, ev, [&](const Event& e, const std::vector<Fill>& fills) {
+  const ReplayStats s = replay(book, ev, [&](const Event& e, const ExecReport&, const std::vector<Fill>& fills) {
     for (const Fill& f : fills) {
       EXPECT_EQ(f.takerId, e.id);
       EXPECT_EQ(f.ts, e.ts);

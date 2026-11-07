@@ -87,7 +87,7 @@ void BM_ReplaySynthetic(benchmark::State& state) {
     state.PauseTiming();  // book construction/destruction is not what we measure
     auto book = std::make_unique<Book>();
     state.ResumeTiming();
-    auto s = replay(*book, events, [](const Event&, const std::vector<Fill>&) {});
+    auto s = replay(*book, events, [](const Event&, const ExecReport&, const std::vector<Fill>&) {});
     benchmark::DoNotOptimize(s.fills);
     state.PauseTiming();
     book.reset();

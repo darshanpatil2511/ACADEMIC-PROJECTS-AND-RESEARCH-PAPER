@@ -1,7 +1,7 @@
 // tickscope_replay: replay real taker flow against a synthetic resting book.
 //
 //   tickscope_replay --prices data/prices.csv --trades data/trades.csv
-//                    [--engine v1|v2|both] [--fills data/fills.csv] [--seed 42]
+//                    [--engine v1|v2|both] [--fills data/fills.csv] [--orders data/orders.csv] [--seed 42]
 //                    [--reps 5] [--json out.json] [--scenario name]
 //                    [--adds-per-sec 25] [--size-median 200] [--size-sigma 1.5]
 //                    [--offset-mean 5] [--lifetime 30] [--market-share 0.2] [--ioc-tol 50]
@@ -122,9 +122,53 @@ struct Verification {
   std::size_t maxOrders = 0, maxLevels = 0;
 };
 
+// One row per order (not cancels): what was asked and what happened to it.
+class OrderWriter {
+ public:
+  explicit OrderWriter(const std::string& path) : f_(std::fopen(path.c_str(), "wb")) {
+    if (!f_) throw std::runtime_error("cannot write " + path);
+    buf_ = "orderId,tsUs,type,side,priceTicks,qtyLots,filled,rested,discarded\n";
+  }
+  ~OrderWriter() {
+    std::fwrite(buf_.data(), 1, buf_.size(), f_);
+    std::fclose(f_);
+  }
+  OrderWriter(const OrderWriter&) = delete;
+  OrderWriter& operator=(const OrderWriter&) = delete;
+
+  void write(const Event& ev, const ExecReport& r) {
+    if (ev.type == EventType::Cancel || r.status != Status::Ok) return;
+    num(ev.id);
+    num(ev.ts);
+    buf_ += takerType(ev.type);
+    buf_ += ev.side == Side::Buy ? ",B," : ",S,";
+    num(ev.price);
+    num(ev.qty);
+    num(r.filled);
+    num(r.rested);
+    buf_ += std::to_string(r.discarded);
+    buf_ += '\n';
+    if (buf_.size() > (1 << 20)) {
+      std::fwrite(buf_.data(), 1, buf_.size(), f_);
+      buf_.clear();
+    }
+  }
+
+ private:
+  template <class Int>
+  void num(Int v) {
+    std::array<char, 24> tmp{};
+    const auto res = std::to_chars(tmp.data(), tmp.data() + tmp.size(), v);
+    buf_.append(tmp.data(), res.ptr);
+    buf_ += ',';
+  }
+  std::FILE* f_;
+  std::string buf_;
+};
+
 // FNV-1a over every field of every fill, in order.
 template <class Book>
-Verification verify(const std::vector<Event>& events, FillWriter* writer) {
+Verification verify(const std::vector<Event>& events, FillWriter* writer, OrderWriter* orders) {
   auto book = std::make_unique<Book>();
   Verification v;
   std::uint64_t h = 1469598103934665603ULL;
@@ -134,7 +178,7 @@ Verification verify(const std::vector<Event>& events, FillWriter* writer) {
   };
   double sumOrders = 0, sumLevels = 0;
   std::size_t samples = 0, n = 0;
-  v.stats = replay(*book, events, [&](const Event& ev, const std::vector<Fill>& fills) {
+  v.stats = replay(*book, events, [&](const Event& ev, const ExecReport& rep, const std::vector<Fill>& fills) {
     for (const Fill& f : fills) {
       mix(static_cast<std::uint64_t>(f.ts));
       mix(f.makerId);
@@ -144,6 +188,7 @@ Verification verify(const std::vector<Event>& events, FillWriter* writer) {
       mix(static_cast<std::uint64_t>(f.qty));
     }
     if (writer) writer->write(ev, fills);
+    if (orders) orders->write(ev, rep);
     if (++n % 1000 == 0) {
       const std::size_t orders = book->orderCount();
       const std::size_t levels = book->levelCount(Side::Buy) + book->levelCount(Side::Sell);
@@ -229,7 +274,7 @@ struct BenchResult {
 template <class Book>
 BenchResult bench(const char* name, const std::vector<Event>& events, int reps) {
   BenchResult res;
-  auto noop = [](const Event&, const std::vector<Fill>&) {};
+  auto noop = [](const Event&, const ExecReport&, const std::vector<Fill>&) {};
   {  // warm-up: page in the event array, let the allocator settle
     auto book = std::make_unique<Book>();
     replay(*book, events, noop);
@@ -322,10 +367,13 @@ int main(int argc, char** argv) try {
   // ---- Verification (and optional fills output) ----
   std::unique_ptr<FillWriter> writer;
   if (args.contains("fills")) writer = std::make_unique<FillWriter>(args.at("fills"));
+  std::unique_ptr<OrderWriter> orderWriter;
+  if (args.contains("orders")) orderWriter = std::make_unique<OrderWriter>(args.at("orders"));
   std::vector<std::pair<std::string, Verification>> verified;
-  if (runV1) verified.emplace_back("v1", verify<OrderBook>(events, writer.get()));
-  if (runV2) verified.emplace_back("v2", verify<OrderBookV2>(events, runV1 ? nullptr : writer.get()));
+  if (runV1) verified.emplace_back("v1", verify<OrderBook>(events, writer.get(), orderWriter.get()));
+  if (runV2) verified.emplace_back("v2", verify<OrderBookV2>(events, runV1 ? nullptr : writer.get(), runV1 ? nullptr : orderWriter.get()));
   writer.reset();
+  orderWriter.reset();
   for (const auto& [name, v] : verified) {
     std::printf("  %s: %llu fills, hash %016llx, book depth avg %.0f orders / %.0f levels (max %zu / %zu)\n",
                 name.c_str(), static_cast<unsigned long long>(v.stats.fills),
@@ -346,6 +394,7 @@ int main(int argc, char** argv) try {
     if (!same) return 2;
   }
   if (args.contains("fills")) std::printf("  wrote %s\n", args.at("fills").c_str());
+  if (args.contains("orders")) std::printf("  wrote %s\n", args.at("orders").c_str());
   if (reps <= 0) return 0;
 
   // ---- Benchmarks ----

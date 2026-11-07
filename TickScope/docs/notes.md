@@ -437,3 +437,54 @@ reference implementation (to 1e-9).
 **Likely questions:** what kurtosis says about tail risk; what the imbalance correlation
 showed and whether it was significant (yes at 5% with HAC, but tiny); why HAC; why ACF
 of |r| differs from ACF of r.
+
+## Phase 7 — Fill analytics
+
+**What exists:** the replay writes `data/orders.csv` (one row per order with
+filled/rested/discarded) next to `data/fills.csv`; `FillAnalytics` + `FillJob` compute fill
+rates, slippage vs 1m VWAP, slippage vs the real Binance print, effective/realized spread
+and price impact at 5 s and 60 s, and the fill-size distribution → section 5 of
+`reports/stats.md` (replaced on each run) and `results/fills.json`. 6 tests on
+hand-computed fixtures. 24.6 s on 6.4M fills / 9.2M orders.
+
+**Cross-check:** Spark's fill rates (IOC 27.60%, market 53.38%, synthetic 19.13%) equal the
+C++ engine's own counters — two independent implementations agree.
+
+**Findings (simulated book vs real 2026-11-05 flow)**
+- Market orders: 86.3% fully filled, 13.3% got nothing (book swept/empty).
+- Slippage vs real print: IOC p99 0.015 bp (bounded by the ±0.50 USDT limit); market
+  orders p99 6.9 bp — large orders walk the thin synthetic book.
+- IOC and synthetic takers show *negative* effective spread and positive impact: makers
+  quoting around the previous second's price get picked off when the price moves —
+  adverse selection, the core risk a market maker manages.
+- Fill sizes: median 24 lots (0.00024 BTC) but 100–9,999-lot fills carry 90% of volume.
+
+**Decisions to be able to explain**
+
+1. **Definitions.** d = +1 taker buy, −1 sell. Effective spread 2d(P − M0)/M0: what the
+   taker paid versus the pre-trade reference. Realized spread 2d(P − Mh)/M0: what the maker
+   kept after h seconds. Price impact = effective − realized: how far the price moved
+   against the maker — information in the flow. Market makers care because realized
+   spread minus fees is their P&L per unit traded.
+
+2. **Reference price.** No quote (bid/ask) data in this dataset, so the mid is approximated
+   by the last-trade price path, using the *previous* second to avoid look-ahead. Stated in
+   the report as a limitation.
+
+3. **Which joins shuffle.**
+   - Fills/executions ⨝ 1m bars (10k rows) and ⨝ price path (605k rows, ~10 MB): broadcast
+     joins — the small side is copied to every task, the 6.4M fills never move.
+   - Executions ⨝ real trades on tradeId: both sides are millions of rows → sort-merge join
+     (shuffle both by tradeId). The date filter on the partitioned Parquet prunes it to one
+     day's directory before reading.
+   - `groupBy(takerId)` to build per-order executions: hash shuffle by taker id.
+
+4. **Ids above Long.MaxValue.** Real order ids have the top bit set, so they are read as
+   `Decimal(20,0)` and the Binance tradeId is recovered by subtracting 2^63.
+
+5. **Approximate quantiles.** `percentile_approx` (Greenwald-Khanna-style sketch) with
+   accuracy 10,000 → relative rank error 1e-4; exact quantiles would need a full sort.
+
+**Likely questions:** what slippage and realized spread measure and why a market maker
+cares; broadcast vs sort-merge join and when Spark picks each; why the synthetic makers lost
+money and how a real one would protect itself (faster requotes, wider spreads, skewing).

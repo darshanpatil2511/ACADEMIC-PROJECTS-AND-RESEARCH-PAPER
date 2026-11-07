@@ -178,7 +178,7 @@ TEST(OrderBookV2, IdenticalFillsToV1OnGeneratedStream) {
 
   auto collect = [&](auto& book) {
     std::vector<Fill> all;
-    const ReplayStats s = replay(book, events, [&](const Event&, const std::vector<Fill>& f) {
+    const ReplayStats s = replay(book, events, [&](const Event&, const ExecReport&, const std::vector<Fill>& f) {
       all.insert(all.end(), f.begin(), f.end());
     });
     return std::make_pair(all, s.cancelHits);

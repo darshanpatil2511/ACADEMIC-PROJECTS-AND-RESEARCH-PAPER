@@ -43,10 +43,10 @@ struct ReplayStats {
   FlowStats realIoc;
 };
 
-// Replays `events` through `book`, calling onFills(event, fills) after each event.
+// Replays `events` through `book`, calling onEvent(event, report, fills) after each event.
 // Pass a no-op callback for benchmarking: it inlines away.
-template <class Book, class OnFills>
-ReplayStats replay(Book& book, const std::vector<Event>& events, OnFills&& onFills) {
+template <class Book, class OnEvent>
+ReplayStats replay(Book& book, const std::vector<Event>& events, OnEvent&& onEvent) {
   ReplayStats s;
   std::vector<Fill> fills;
   fills.reserve(4096);
@@ -70,7 +70,7 @@ ReplayStats replay(Book& book, const std::vector<Event>& events, OnFills&& onFil
       f.rested += r.rested;
       f.discarded += r.discarded;
     }
-    onFills(ev, fills);
+    onEvent(ev, r, fills);
   }
   return s;
 }

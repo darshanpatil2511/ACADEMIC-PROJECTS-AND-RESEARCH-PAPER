@@ -42,6 +42,9 @@ Full plan: `docs/PLAN.md`. Interview notes: `docs/notes.md`. Benchmarks: `docs/b
 - Bench:   `cmake -S engine -B build-rel -G Ninja -DCMAKE_BUILD_TYPE=Release && cmake --build build-rel && ./build-rel/bench/tickscope_bench --benchmark_repetitions=5`
 - Replay:  `./build-rel/tickscope_replay --prices data/prices.csv --trades data/trades.csv [--fills data/fills.csv] [--reps 5 --json results/bench_v1.json]`
 - Features: `cd analytics && sbt "runMain tickscope.features.FeatureJob --clean ../data/clean --out ../data/features --prices ../data/prices.csv"`
+- Stats:   `cd analytics && sbt "runMain tickscope.stats.StatsJob --bars ../data/features/bars_1m --report ../reports/stats.md --json ../results/stats.json"`
+- Fills:   `./build-rel/tickscope_replay --engine v2 --fills data/fills.csv --orders data/orders.csv` then
+           `cd analytics && sbt "runMain tickscope.fills.FillJob --fills ../data/fills.csv --orders ../data/orders.csv --bars ../data/features/bars_1m --prices ../data/prices.csv --clean ../data/clean --day 2026-11-05 --report ../reports/stats.md --json ../results/fills.json"` (run after StatsJob; it replaces section 5)
 - Spark:   `cd analytics && sbt test` (forked JVM auto-uses Java 17: `$TICKSCOPE_JAVA_HOME` or Homebrew openjdk@17)
 - Data:    `scripts/download.sh 7` → `data/raw/*.csv.gz` (disk is tight: keep gzip, never unzip)
 - Ingest:  `cd analytics && sbt "runMain tickscope.ingest.IngestJob --raw ../data/raw --out ../data/clean"`
