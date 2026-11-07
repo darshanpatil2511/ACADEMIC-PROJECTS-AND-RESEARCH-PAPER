@@ -1,0 +1,23 @@
+# Data (downloaded and generated)
+data/
+
+# C++ builds
+build/
+build-*/
+cmake-build-*/
+
+# Scala / sbt
+target/
+.bsp/
+.bloop/
+.metals/
+project/project/
+spark-warehouse/
+metastore_db/
+derby.log
+
+# Dashboard
+dashboard/node_modules/
+dashboard/dist/
+
+.DS_Store

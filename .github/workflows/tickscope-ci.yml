@@ -1,0 +1,59 @@
+# TickScope: build and test the C++ engine and the Spark analytics on every push and
+# pull request that touches the project. Benchmarks are built but never run in CI
+# (shared runners give noisy timings).
+name: TickScope CI
+
+on:
+  push:
+    paths:
+      - "TickScope/**"
+      - ".github/workflows/tickscope-ci.yml"
+  pull_request:
+    paths:
+      - "TickScope/**"
+      - ".github/workflows/tickscope-ci.yml"
+
+jobs:
+  engine:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: TickScope
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Ninja
+        run: sudo apt-get update && sudo apt-get install -y ninja-build
+      - name: Cache fetched dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            TickScope/build/_deps
+            TickScope/build-rel/_deps
+          key: tickscope-deps-${{ runner.os }}-${{ hashFiles('TickScope/engine/CMakeLists.txt') }}
+      - name: Debug build with ASan + UBSan (benchmarks off)
+        run: |
+          cmake -S engine -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug \
+            -DTICKSCOPE_SANITIZE=ON -DTICKSCOPE_BUILD_BENCH=OFF
+          cmake --build build
+      - name: Tests
+        run: ctest --test-dir build --output-on-failure
+      - name: Release build (checks the benchmark binary compiles)
+        run: |
+          cmake -S engine -B build-rel -G Ninja -DCMAKE_BUILD_TYPE=Release
+          cmake --build build-rel
+
+  analytics:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: TickScope/analytics
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: sbt
+      - uses: sbt/setup-sbt@v1
+      - name: Tests
+        run: sbt -batch test
