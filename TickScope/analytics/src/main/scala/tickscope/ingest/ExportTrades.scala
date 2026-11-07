@@ -1,9 +1,8 @@
 package tickscope.ingest
 
-import org.apache.hadoop.fs.{FileSystem, Path}
 import org.apache.spark.sql.functions._
-import org.apache.spark.sql.{DataFrame, Dataset, SaveMode}
-import tickscope.{Args, Spark}
+import org.apache.spark.sql.{DataFrame, Dataset}
+import tickscope.{Args, Io, Spark}
 
 /** Cleaned Parquet -> one CSV of taker flow for the C++ replay driver.
   *
@@ -37,24 +36,7 @@ object ExportTrades {
       val from = opts.get("from").fold(all)(d => all.filter(col("date") >= lit(d).cast("date")))
       val inRange = opts.get("to").fold(from)(d => from.filter(col("date") <= lit(d).cast("date")))
 
-      val tmpDir = outFile + ".tmp"
-      toTakerFlow(inRange)
-        .repartition(1)
-        .sortWithinPartitions("tradeId")
-        .write
-        .mode(SaveMode.Overwrite)
-        .option("header", "true")
-        .csv(tmpDir)
-
-      // Spark writes a directory of part files; move the single part to the requested name.
-      val fs = FileSystem.get(new Path(outFile).toUri, spark.sparkContext.hadoopConfiguration)
-      val part = fs.globStatus(new Path(tmpDir, "part-*.csv")).head.getPath
-      fs.delete(new Path(outFile), false)
-      fs.rename(part, new Path(outFile))
-      fs.delete(new Path(tmpDir), true)
-      // The local Hadoop filesystem moves the part's checksum sidecar along with it.
-      val out = new Path(outFile)
-      fs.delete(new Path(out.getParent, s".${out.getName}.crc"), false)
+      Io.writeSingleCsv(toTakerFlow(inRange), outFile, "tradeId")
       println(s"wrote $outFile")
     } finally spark.stop()
   }

@@ -182,3 +182,60 @@ prevention; ids may be reused once an order leaves the book; no price bands.
 what invalidates `std::list` iterators (only erasing that node); why `std::map` iterators
 and node pointers survive other inserts; what a crossed book is and why it can never
 persist here (an incoming order matches until it no longer crosses, and only then rests).
+
+## Phase 2 — Feature engine
+
+**What exists:** `Bars.compute(trades, intervalSec, volWindow)` (1m and 5m bars: OHLCV,
+VWAP, trade count, buy/sell volume, imbalance, log return, rolling realized volatility),
+`Prices.lastPricePerSecond` (1-second path, gaps forward-filled), and `FeatureJob` which
+writes `data/features/bars_{1m,5m}` (Parquet by date) and `data/prices.csv`. 8
+known-answer tests on a hand-built tape; the job also checks invariants on every run.
+
+**First real run** (7 days, single run, 20.3 s): 10,080 1m bars (= 7 × 1,440, no missing
+minute), 2,016 5m bars; all 22,520,393 trades accounted for; VWAP inside [low, high] for
+every bar; 604,800 rows in `prices.csv`.
+
+**Decisions to be able to explain**
+
+1. **Bar bucketing.** `floor(tsUs / width) * width` gives the bar start; integer maths on
+   microseconds, no timestamp/timezone conversions on the hot column.
+
+2. **Open/close by `tradeId`, not timestamp.** Many trades share a microsecond (one taker
+   filling several makers), so "first by time" is ambiguous. `min_by(price, tradeId)` /
+   `max_by(price, tradeId)` use the exchange's sequence, which is a total order. The test
+   tape has two same-timestamp pairs to pin this down.
+
+3. **VWAP = Σ(price·qty) / Σqty**, the average price paid per unit traded. It always lies
+   within [low, high] (checked on every run). Benchmarks for execution quality (Phase 7)
+   are measured against it.
+
+4. **Imbalance = (buyVol − sellVol) / (buyVol + sellVol)**, using the *taker* side, in
+   [−1, 1]. Taker side comes from `isBuyerMaker` (true → taker sold).
+
+5. **Which steps shuffle.**
+   - `groupBy(barStart).agg(...)`: one hash shuffle by bar. Spark first aggregates within
+     each partition (partial aggregation), so each partition sends one row per bar, not
+     one row per trade — 22.5M trades shrink to ~10k rows before the network.
+   - `lag` and the rolling window run *on the bars*. Their window has no partition key,
+     so all bars move to one partition (Spark warns about this). Acceptable on 10k rows;
+     it would be a bug on raw trades. Partitioning by date would avoid it but would lose
+     the return across midnight.
+   - The price path joins every second in range to the per-second last price, then
+     forward-fills with `last(..., ignoreNulls)` — again on small data (86,400 rows/day).
+   - `cache()` on the trades: three outputs (1m, 5m, prices) read the same input.
+
+6. **Log returns and realized volatility.** Log returns add over time
+   (r₁ + r₂ = ln(P₂/P₀)), so multi-bar returns are sums. Realized volatility over a window
+   is √Σr², the standard estimator when the mean return is ≈ 0 at short horizons; null
+   until the window is full. Not annualized (multiply by √(bars per year) to annualize).
+
+7. **Missing bars.** A minute with no trades produces no bar; the next bar's return spans
+   the gap. On this data there were none (10,080 = 7 × 1,440). The price path, by
+   contrast, forward-fills so the C++ replay always has a reference price.
+
+8. **Doubles here, integers in the engine.** Research maths (logs, ratios) needs floating
+   point; exact matching does not. The price path is exported in integer ticks.
+
+**Likely questions:** what partial aggregation does to shuffle size; why a window without
+`partitionBy` is dangerous on big data; VWAP vs TWAP; why log returns and not simple
+returns; what realized volatility estimates.
