@@ -3,6 +3,7 @@
 //   tickscope_replay --prices data/prices.csv --trades data/trades.csv
 //                    [--engine v1|v2|both] [--fills data/fills.csv] [--orders data/orders.csv] [--seed 42]
 //                    [--reps 5] [--json out.json] [--scenario name] [--pipeline 5 --pipeline-json out.json]
+//                    [--snapshot out.json --snapshot-from tsSec --snapshot-seconds 60 --snapshot-step-ms 250]
 //                    [--adds-per-sec 25] [--size-median 200] [--size-sigma 1.5]
 //                    [--offset-mean 5] [--lifetime 30] [--market-share 0.2] [--ioc-tol 50]
 //
@@ -351,8 +352,9 @@ int main(int argc, char** argv) try {
   auto t0 = Clock::now();
   std::vector<Event> events;
   std::size_t realTrades = 0;
+  std::vector<PricePoint> prices;
   {
-    const auto prices = parsePrices(readFile(get("prices", "data/prices.csv")));
+    prices = parsePrices(readFile(get("prices", "data/prices.csv")));
     const auto trades = parseTrades(readFile(get("trades", "data/trades.csv")));
     realTrades = trades.size();
     std::printf("loaded %zu prices, %zu trades in %.2f s\n", prices.size(), trades.size(), secondsSince(t0));
@@ -397,6 +399,58 @@ int main(int argc, char** argv) try {
   }
   if (args.contains("fills")) std::printf("  wrote %s\n", args.at("fills").c_str());
   if (args.contains("orders")) std::printf("  wrote %s\n", args.at("orders").c_str());
+
+  // ---- Order-book snapshots for the dashboard replay (engine v1: has depth()) ----
+  if (args.contains("snapshot")) {
+    const std::int64_t fromSec = std::stoll(get("snapshot-from", "0"));
+    const std::int64_t seconds = std::stoll(get("snapshot-seconds", "60"));
+    const std::int64_t stepUs = std::stoll(get("snapshot-step-ms", "250")) * 1000;
+    const std::size_t levels = std::stoul(get("snapshot-levels", "12"));
+    const TimestampUs fromUs = fromSec * 1'000'000, toUs = (fromSec + seconds) * 1'000'000;
+    OrderBook book;
+    TimestampUs nextFrame = fromUs;
+    std::string frames, tape;
+    auto ladder = [&](Side side) {
+      std::string out = "[";
+      const auto d = book.depth(side, levels);
+      for (std::size_t i = 0; i < d.size(); ++i) {
+        out += (i ? "," : "") + std::string("[") + std::to_string(d[i].first) + "," + std::to_string(d[i].second) + "]";
+      }
+      return out + "]";
+    };
+    replay(book, events, [&](const Event& ev, const ExecReport&, const std::vector<Fill>& fills) {
+      if (ev.ts < fromUs || ev.ts >= toUs) return;
+      for (const Fill& f : fills) {
+        tape += std::string(tape.empty() ? "" : ",") + "[" + std::to_string(f.ts - fromUs) + "," +
+                std::to_string(f.price) + "," + std::to_string(f.qty) + ",\"" + (f.takerSide == Side::Buy ? "B" : "S") +
+                "\",\"" + takerType(ev.type) + "\"]";
+      }
+      // A frame is the book state after the first event at or past each step boundary.
+      while (ev.ts >= nextFrame && nextFrame < toUs) {
+        frames += std::string(frames.empty() ? "" : ",\n    ") + "{\"t\":" + std::to_string(nextFrame - fromUs) +
+                  ",\"bids\":" + ladder(Side::Buy) + ",\"asks\":" + ladder(Side::Sell) + "}";
+        nextFrame += stepUs;
+      }
+    });
+    std::string ref;
+    for (const PricePoint& p : prices) {
+      if (p.tsSec >= fromSec - 1 && p.tsSec < fromSec + seconds) {
+        ref += std::string(ref.empty() ? "" : ",") + "[" + std::to_string((p.tsSec - fromSec) * 1'000'000) + "," +
+               std::to_string(p.price) + "]";
+      }
+    }
+    const std::string json = "{\n  \"fromSec\": " + std::to_string(fromSec) + ",\n  \"seconds\": " +
+                             std::to_string(seconds) + ",\n  \"stepUs\": " + std::to_string(stepUs) +
+                             ",\n  \"levels\": " + std::to_string(levels) + ",\n  \"seed\": " +
+                             std::to_string(cfg.seed) + ",\n  \"realPricePath\": [" + ref + "],\n  \"fills\": [" +
+                             tape + "],\n  \"frames\": [\n    " + frames + "\n  ]\n}\n";
+    std::FILE* f = std::fopen(args.at("snapshot").c_str(), "wb");
+    if (!f) throw std::runtime_error("cannot write " + args.at("snapshot"));
+    std::fwrite(json.data(), 1, json.size(), f);
+    std::fclose(f);
+    std::printf("wrote %s (%lld s from %lld)\n", args.at("snapshot").c_str(), static_cast<long long>(seconds),
+                static_cast<long long>(fromSec));
+  }
 
   // ---- Two-thread pipeline vs single thread (engine v2) ----
   if (const int preps = std::stoi(get("pipeline", "0")); preps > 0) {

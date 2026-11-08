@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TickScope Results</title>
+  <meta name="description" content="TickScope: C++20 matching engine and Spark market-data research on real Binance BTCUSDT flow. Every number is loaded from recorded benchmark and analysis runs.">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <header class="top">
+    <div class="wrap top-inner">
+      <div>
+        <h1>TickScope</h1>
+        <p class="sub">C++20 order book &amp; matching engine replaying real Binance BTCUSDT flow, and a Scala/Spark research pipeline. Every number on this page is loaded from a recorded run.</p>
+      </div>
+      <div class="top-actions">
+        <a class="btn" href="https://github.com/darshanpatil2511/ACADEMIC-PROJECTS-AND-RESEARCH-PAPER/tree/main/TickScope">Source &amp; README</a>
+        <button class="btn" id="theme-toggle" type="button" aria-label="Toggle dark mode">Theme</button>
+      </div>
+    </div>
+    <nav class="wrap nav" aria-label="Sections">
+      <a href="#engine">Engine</a><a href="#replay">Book replay</a><a href="#pipeline">Pipeline</a><a href="#spark">Spark</a><a href="#market">Market</a><a href="#stats">Statistics</a><a href="#fills">Fills</a>
+    </nav>
+  </header>
+
+  <main class="wrap">
+    <p id="load-error" class="error" hidden></p>
+
+    <section class="kpis" aria-label="Headline results" id="kpis"></section>
+
+    <section id="engine" class="section">
+      <h2>Matching engine: v1 vs v2</h2>
+      <p class="lede">v1 uses <code>std::map</code> price levels and <code>std::list</code> queues. v2 uses a flat level array with a bitmap, a preallocated order pool and an open-addressing id map. Both replay the same seeded stream, and their fill streams hash identically.</p>
+      <div class="grid2">
+        <figure class="card">
+          <figcaption><strong>Throughput</strong> <span class="muted">events/s, median of 5 runs</span></figcaption>
+          <div class="legend" id="lg-throughput"></div>
+          <div class="chart h260"><canvas id="c-throughput" role="img" aria-label="Throughput v1 versus v2 for shallow and deep books"></canvas></div>
+          <p class="note" id="n-throughput"></p>
+        </figure>
+        <figure class="card">
+          <figcaption><strong>p99 latency per operation</strong> <span class="muted">ns, deep book</span></figcaption>
+          <div class="legend" id="lg-latency"></div>
+          <div class="chart h260"><canvas id="c-latency" role="img" aria-label="p99 latency by operation, v1 versus v2"></canvas></div>
+          <p class="note">The p50 is below Apple Silicon's 41 ns <code>steady_clock</code> resolution, so only p99 is shown.</p>
+        </figure>
+      </div>
+      <details class="card table-card"><summary>Microbenchmarks (Google Benchmark, median of 5)</summary><div id="t-micro"></div></details>
+    </section>
+
+    <section id="replay" class="section">
+      <h2>Order book replay</h2>
+      <p class="lede">The busiest minute of 2026-11-05 (BTC moved hundreds of dollars). Real Binance taker flow hits a seeded synthetic book. The depth ladder below is the engine's own state, sampled every 250 ms.</p>
+      <div class="card replay">
+        <div class="replay-controls">
+          <button class="btn" id="rp-play" type="button">Play</button>
+          <input id="rp-slider" type="range" min="0" value="0" step="1" aria-label="Replay time">
+          <span class="mono" id="rp-time">0.00 s</span>
+        </div>
+        <div class="replay-body">
+          <div class="ladder" id="rp-ladder" aria-live="off"></div>
+          <div class="replay-side">
+            <div class="chart h180"><canvas id="c-replay-price" role="img" aria-label="Real price over the replay minute"></canvas></div>
+            <h3 class="small-h">Recent fills</h3>
+            <div class="tape mono" id="rp-tape"></div>
+          </div>
+        </div>
+        <p class="note" id="rp-note"></p>
+      </div>
+    </section>
+
+    <section id="pipeline" class="section">
+      <h2>Two-thread pipeline: lock-free SPSC queue</h2>
+      <p class="lede">A producer thread feeds the engine thread through a bounded ring buffer: acquire/release atomics, 128-byte padding (M-series cache line), batch pops.</p>
+      <figure class="card">
+        <figcaption><strong>Throughput by hand-off mode</strong> <span class="muted">events/s, engine v2, median of 5</span></figcaption>
+        <div class="chart h220"><canvas id="c-pipeline" role="img" aria-label="Pipeline throughput by mode"></canvas></div>
+        <p class="note">The producer only copies pre-built events, so the hand-off is pure overhead here. The chart isolates the cost of the queue. A second thread pays off when the producer does real work (I/O, parsing).</p>
+      </figure>
+    </section>
+
+    <section id="spark" class="section">
+      <h2>Spark: same workload, five variants</h2>
+      <p class="lede">1-minute bars and a daily summary over 7 of 30 days (22.5M of 84.7M trades), 3 runs each, fresh SparkSession per run.</p>
+      <figure class="card">
+        <figcaption><strong>Median runtime</strong> <span class="muted">seconds, log scale</span></figcaption>
+        <div class="chart h240"><canvas id="c-spark" role="img" aria-label="Spark runtime by variant"></canvas></div>
+        <p class="note" id="n-spark"></p>
+      </figure>
+      <details class="card table-card"><summary>All runs and scan metrics</summary><div id="t-spark"></div></details>
+    </section>
+
+    <section id="market" class="section">
+      <h2>Market: BTCUSDT, 5-minute bars</h2>
+      <div class="grid2">
+        <figure class="card">
+          <figcaption><strong>Close price</strong> <span class="muted">USDT</span></figcaption>
+          <div class="chart h240"><canvas id="c-price" role="img" aria-label="BTCUSDT close price, 5-minute bars"></canvas></div>
+        </figure>
+        <figure class="card">
+          <figcaption><strong>Volume</strong> <span class="muted">BTC per hour</span></figcaption>
+          <div class="chart h240"><canvas id="c-volume" role="img" aria-label="BTCUSDT volume per hour"></canvas></div>
+        </figure>
+      </div>
+    </section>
+
+    <section id="stats" class="section">
+      <h2>Statistics of 1-minute returns</h2>
+      <div class="kpis small" id="stat-tiles"></div>
+      <div class="grid2">
+        <figure class="card">
+          <figcaption><strong>Return distribution vs normal</strong> <span class="muted">count per ½σ bin, log scale</span></figcaption>
+          <div class="legend" id="lg-hist"></div>
+          <div class="chart h260"><canvas id="c-hist" role="img" aria-label="Histogram of standardized returns against a normal distribution"></canvas></div>
+          <p class="note">Bins clamp at ±8σ. Under a normal distribution the outer bins would be essentially empty.</p>
+        </figure>
+        <figure class="card">
+          <figcaption><strong>Autocorrelation</strong> <span class="muted">lags 1–5 minutes</span></figcaption>
+          <div class="legend" id="lg-acf"></div>
+          <div class="chart h260"><canvas id="c-acf" role="img" aria-label="Autocorrelation of returns and absolute returns"></canvas></div>
+          <p class="note" id="n-acf"></p>
+        </figure>
+      </div>
+    </section>
+
+    <section id="fills" class="section">
+      <h2>Fill analytics</h2>
+      <p class="lede">Real taker flow against the <strong>synthetic</strong> resting book. These numbers describe the simulation, not Binance's actual execution quality.</p>
+      <div class="grid2">
+        <figure class="card">
+          <figcaption><strong>Fill rate by order type</strong> <span class="muted">% of submitted quantity</span></figcaption>
+          <div class="chart h220"><canvas id="c-fillrate" role="img" aria-label="Fill rate by order type"></canvas></div>
+        </figure>
+        <div class="card table-card"><h3 class="small-h">Spreads at 5 s <span class="muted">bp, quantity-weighted</span></h3><div id="t-spreads"></div>
+          <p class="note">Negative effective spread means the taker beat the pre-trade price: synthetic makers quoting the previous second's price got picked off (adverse selection).</p></div>
+      </div>
+      <details class="card table-card"><summary>Slippage quantiles (bp)</summary><div id="t-slippage"></div></details>
+    </section>
+
+    <footer class="foot">
+      <p>Data: Binance public trade files (data.binance.vision). Machine: Apple M2, 8 GB. Method notes, raw run output and limitations are in <code>docs/bench.md</code> and <code>reports/stats.md</code>.</p>
+    </footer>
+  </main>
+</body>
+</html>

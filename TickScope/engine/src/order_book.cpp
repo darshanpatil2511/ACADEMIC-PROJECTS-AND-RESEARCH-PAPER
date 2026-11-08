@@ -169,6 +169,20 @@ std::size_t OrderBook::ordersAt(Side side, PriceTicks price) const {
   return it == asks_.end() ? 0 : it->second.orders.size();
 }
 
+std::vector<std::pair<PriceTicks, QtyLots>> OrderBook::depth(Side side, std::size_t n) const {
+  std::vector<std::pair<PriceTicks, QtyLots>> out;
+  out.reserve(n);
+  auto take = [&](const auto& ladder) {
+    for (auto it = ladder.begin(); it != ladder.end() && out.size() < n; ++it) out.emplace_back(it->first, it->second.total);
+  };
+  if (side == Side::Buy) {
+    take(bids_);
+  } else {
+    take(asks_);
+  }
+  return out;
+}
+
 std::size_t OrderBook::levelCount(Side side) const {
   return side == Side::Buy ? bids_.size() : asks_.size();
 }

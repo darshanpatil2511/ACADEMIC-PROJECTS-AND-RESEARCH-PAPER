@@ -45,6 +45,7 @@ Full plan: `docs/PLAN.md`. Interview notes: `docs/notes.md`. Benchmarks: `docs/b
 - Stats:   `cd analytics && sbt "runMain tickscope.stats.StatsJob --bars ../data/features/bars_1m --report ../reports/stats.md --json ../results/stats.json"`
 - Fills:   `./build-rel/tickscope_replay --engine v2 --fills data/fills.csv --orders data/orders.csv` then
            `cd analytics && sbt "runMain tickscope.fills.FillJob --fills ../data/fills.csv --orders ../data/orders.csv --bars ../data/features/bars_1m --prices ../data/prices.csv --clean ../data/clean --day 2026-11-05 --report ../reports/stats.md --json ../results/fills.json"` (run after StatsJob; it replaces section 5)
+- Dashboard: `python3 -m http.server 8000` from TickScope/, open /dashboard/ (data = results/*.json; regenerate snapshot with `tickscope_replay --snapshot results/book_replay.json --snapshot-from 1793891734`, market/hist with `DashboardExport`)
 - Spark:   `cd analytics && sbt test` (forked JVM auto-uses Java 17: `$TICKSCOPE_JAVA_HOME` or Homebrew openjdk@17)
 - Data:    `scripts/download.sh 7` → `data/raw/*.csv.gz` (disk is tight: keep gzip, never unzip)
 - Ingest:  `cd analytics && sbt "runMain tickscope.ingest.IngestJob --raw ../data/raw --out ../data/clean"`

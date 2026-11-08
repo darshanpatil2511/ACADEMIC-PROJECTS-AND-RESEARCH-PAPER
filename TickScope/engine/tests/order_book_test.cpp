@@ -227,4 +227,17 @@ TYPED_TEST(OrderBookTest, IdCanBeReusedAfterOrderLeavesBook) {
   EXPECT_EQ(this->sell(1, 100, 1).status, Status::Ok);
 }
 
+TEST(OrderBookDepth, BestLevelsFirstWithTotals) {
+  OrderBook book;
+  std::vector<Fill> fills;
+  book.addLimit(1, Side::Buy, 99, 5, 0, fills);
+  book.addLimit(2, Side::Buy, 100, 3, 0, fills);
+  book.addLimit(3, Side::Buy, 100, 4, 0, fills);
+  book.addLimit(4, Side::Buy, 98, 1, 0, fills);
+  book.addLimit(5, Side::Sell, 102, 2, 0, fills);
+  using L = std::vector<std::pair<PriceTicks, QtyLots>>;
+  EXPECT_EQ(book.depth(Side::Buy, 2), (L{{100, 7}, {99, 5}}));
+  EXPECT_EQ(book.depth(Side::Sell, 5), (L{{102, 2}}));
+}
+
 }  // namespace

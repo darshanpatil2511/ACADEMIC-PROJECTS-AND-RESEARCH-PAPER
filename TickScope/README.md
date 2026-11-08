@@ -6,6 +6,7 @@ latency-critical path: price-time priority matching, O(1) cancels, a cache-frien
 **52M events/s (1.76× v1, 2.20× on a deep book)** and a lock-free SPSC queue. The Spark side
 runs the research path: it cleans 84.7M real trades, builds bars and statistics, and analyzes
 the engine's fills, with a partition-pruned Parquet layout **≥31× faster than naive CSV**.
+**Live results dashboard:** [darshanpatil2511.github.io/ACADEMIC-PROJECTS-AND-RESEARCH-PAPER/tickscope/dashboard](https://darshanpatil2511.github.io/ACADEMIC-PROJECTS-AND-RESEARCH-PAPER/tickscope/dashboard/) (charts, an animated order-book replay of the busiest minute, all loaded from `results/`).
 Every number in this README comes from a recorded run in [`docs/bench.md`](docs/bench.md) or
 [`reports/stats.md`](reports/stats.md).
 
@@ -122,7 +123,7 @@ The full reasoning for each phase, plus likely interview questions, is in [`docs
 
 ## How it is tested
 
-- **Engine (69 tests, ASan + UBSan in CI):** the order book tests run against both v1 and
+- **Engine (70 tests, ASan + UBSan in CI):** the order book tests run against both v1 and
   v2. **Differential tests** compare both books with a naive reference book on 20k-op random
   streams, including a tiny-band drifting-price mode that forces 100+ recenters.
 - **Concurrency:** 10M-item SPSC stress tests and a lockstep handoff test, run under
@@ -162,7 +163,10 @@ cmake -S engine -B build-rel -G Ninja -DCMAKE_BUILD_TYPE=Release && cmake --buil
 ./build-rel/tickscope_replay --engine both --reps 5 --fills data/fills.csv --orders data/orders.csv
 ./build-rel/bench/tickscope_bench --benchmark_repetitions=5
 
-# 4. Fill analytics (appends section 5 to reports/stats.md)
+# 4. Dashboard locally: serve the TickScope folder, open http://localhost:8000/dashboard/
+#    python3 -m http.server 8000
+
+# 5. Fill analytics (appends section 5 to reports/stats.md)
 cd analytics && sbt "runMain tickscope.fills.FillJob --fills ../data/fills.csv --orders ../data/orders.csv --bars ../data/features/bars_1m --prices ../data/prices.csv --clean ../data/clean --day 2026-11-05 --report ../reports/stats.md"
 ```
 
@@ -176,7 +180,8 @@ cd analytics && sbt "runMain tickscope.fills.FillJob --fills ../data/fills.csv -
 | `analytics/src/main/scala/tickscope/` | `ingest/`, `features/`, `stats/`, `fills/`, `bench/` |
 | `scripts/download.sh` | Checksummed data download |
 | `docs/` | `bench.md` (every run), `notes.md` (design + interview notes), `spark-plans.md`, `PLAN.md` |
-| `reports/stats.md`, `results/*.json` | Generated reports and machine-readable results |
+| `reports/stats.md`, `results/*.json` | Generated reports and machine-readable results (the dashboard's only data source) |
+| `dashboard/` | Static results dashboard (HTML/CSS/JS + Chart.js), deployed to GitHub Pages from `main` |
 
 ## Limitations
 

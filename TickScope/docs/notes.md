@@ -594,3 +594,28 @@ on this layout; why Parquet beats CSV; Dataset vs DataFrame (typed case classes 
 pipeline stages, untyped DataFrame operations where Spark functions like `min_by` and window
 functions are clearer); what you would change on a cluster (S3 paths, `provided` Spark
 dependency, executor sizing, more partitions per day).
+
+## Phase 10 — Results dashboard
+
+**What exists:** `dashboard/` (static HTML/CSS/JS, Chart.js 4.4.1 from a pinned CDN URL) that
+loads every number from `results/*.json` at runtime; `DashboardExport` (5-minute bars and
+the standardized return histogram), `tickscope_replay --snapshot` (engine depth ladder every
+250 ms for the busiest minute of 2026-11-05, plus fills and the real price path);
+`tickscope-pages.yml` deploys `dashboard/` + `results/` to GitHub Pages from `main`.
+
+**Decisions to be able to explain**
+1. **No numbers in the page source.** The page is a view over the JSON written by the
+   engine and Spark jobs, so it cannot drift from the recorded runs (the one exception, the
+   earlier-session Spark figure, is labelled as such).
+2. **Static site, no build step.** Nothing to install or break; GitHub Pages serves files.
+3. **Chart choices.** v1 drawn in gray and v2 in the accent color ("highlight one, gray the
+   rest"); one y-axis per chart (price and volume are two charts, not a dual axis); log
+   scales where values span orders of magnitude (Spark runtimes, histogram tails); the
+   ±1.96/√n band as hairlines. Palette checked with a colour-vision-deficiency validator in
+   light and dark mode.
+4. **Replay from engine state, not a re-implementation.** The browser does not re-run the
+   matcher; it plays frames the C++ engine recorded, so what you see is exactly what the
+   engine did (including 33 frames where real flow swept one side of the synthetic book).
+5. **Checked by rendering.** Headless Chrome screenshots at 1280 px (light and dark) and an
+   emulated 390 px phone viewport (no page-level horizontal overflow); the Play button was
+   clicked programmatically and the replay clock advanced with no page errors.

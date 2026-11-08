@@ -6,6 +6,7 @@
 #include <map>
 #include <optional>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 #include "tickscope/order.hpp"
@@ -50,6 +51,9 @@ class OrderBook {
   [[nodiscard]] std::size_t ordersAt(Side side, PriceTicks price) const;
   [[nodiscard]] std::size_t levelCount(Side side) const;
   [[nodiscard]] std::size_t orderCount() const { return index_.size(); }
+
+  // Best `n` price levels on a side, best first: (price, total quantity). O(n).
+  [[nodiscard]] std::vector<std::pair<PriceTicks, QtyLots>> depth(Side side, std::size_t n) const;
 
  private:
   struct Level {
