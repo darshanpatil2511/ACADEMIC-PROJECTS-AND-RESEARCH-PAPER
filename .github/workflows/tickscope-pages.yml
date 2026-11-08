@@ -1,0 +1,59 @@
+# TickScope: publish the results dashboard (static HTML + the JSON in TickScope/results) to
+# GitHub Pages at <pages-url>/tickscope/dashboard/. Runs on main only: the github-pages
+# environment deploys from the default branch.
+name: TickScope dashboard
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "TickScope/dashboard/**"
+      - "TickScope/results/**"
+      - ".github/workflows/tickscope-pages.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Assemble site
+        run: |
+          mkdir -p _site/tickscope
+          cp -r TickScope/dashboard _site/tickscope/dashboard
+          cp -r TickScope/results _site/tickscope/results
+          cat > _site/tickscope/index.html <<'EOF'
+          <!doctype html><meta charset="utf-8"><title>TickScope</title>
+          <meta http-equiv="refresh" content="0; url=dashboard/"><a href="dashboard/">TickScope dashboard</a>
+          EOF
+          if [ ! -f _site/index.html ]; then
+            cat > _site/index.html <<'EOF'
+          <!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+          <title>Projects</title>
+          <body style="font:16px/1.5 system-ui,sans-serif;max-width:640px;margin:48px auto;padding:0 16px">
+          <h1>Projects</h1><ul><li><a href="tickscope/dashboard/">TickScope</a>: order book engine and market-data research results</li></ul>
+          </body>
+          EOF
+          fi
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}tickscope/dashboard/
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
