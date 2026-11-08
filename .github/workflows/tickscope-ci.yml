@@ -42,6 +42,31 @@ jobs:
           cmake -S engine -B build-rel -G Ninja -DCMAKE_BUILD_TYPE=Release
           cmake --build build-rel
 
+  engine-tsan:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: TickScope
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Ninja
+        run: sudo apt-get update && sudo apt-get install -y ninja-build
+      - name: Cache fetched dependencies
+        uses: actions/cache@v4
+        with:
+          path: TickScope/build-tsan/_deps
+          key: tickscope-tsan-deps-${{ runner.os }}-${{ hashFiles('TickScope/engine/CMakeLists.txt') }}
+      - name: Build with ThreadSanitizer
+        run: |
+          cmake -S engine -B build-tsan -G Ninja -DCMAKE_BUILD_TYPE=Debug \
+            -DTICKSCOPE_TSAN=ON -DTICKSCOPE_BUILD_BENCH=OFF
+          cmake --build build-tsan
+      - name: SPSC queue tests under TSan (3 repeats)
+        env:
+          TICKSCOPE_STRESS_ITEMS: "1000000"
+          TSAN_OPTIONS: "halt_on_error=1"
+        run: ./build-tsan/tests/tickscope_tests --gtest_filter='Spsc*' --gtest_repeat=3
+
   analytics:
     runs-on: ubuntu-latest
     defaults:

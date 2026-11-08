@@ -2,7 +2,7 @@
 //
 //   tickscope_replay --prices data/prices.csv --trades data/trades.csv
 //                    [--engine v1|v2|both] [--fills data/fills.csv] [--orders data/orders.csv] [--seed 42]
-//                    [--reps 5] [--json out.json] [--scenario name]
+//                    [--reps 5] [--json out.json] [--scenario name] [--pipeline 5 --pipeline-json out.json]
 //                    [--adds-per-sec 25] [--size-median 200] [--size-sigma 1.5]
 //                    [--offset-mean 5] [--lifetime 30] [--market-share 0.2] [--ioc-tol 50]
 //
@@ -18,6 +18,7 @@
 #include <charconv>
 #include <chrono>
 #include <cstdio>
+#include <functional>
 #include <map>
 #include <memory>
 #include <stdexcept>
@@ -28,6 +29,7 @@
 #include "tickscope/market_data.hpp"
 #include "tickscope/order_book.hpp"
 #include "tickscope/order_book_v2.hpp"
+#include "tickscope/pipeline.hpp"
 #include "tickscope/replay.hpp"
 
 #ifndef TICKSCOPE_BUILD_INFO
@@ -395,6 +397,57 @@ int main(int argc, char** argv) try {
   }
   if (args.contains("fills")) std::printf("  wrote %s\n", args.at("fills").c_str());
   if (args.contains("orders")) std::printf("  wrote %s\n", args.at("orders").c_str());
+
+  // ---- Two-thread pipeline vs single thread (engine v2) ----
+  if (const int preps = std::stoi(get("pipeline", "0")); preps > 0) {
+    struct Mode {
+      const char* name;
+      std::function<PipelineResult()> run;
+    };
+    const std::size_t cap = 4096;
+    const std::vector<Mode> modes{
+        {"single_thread", [&] {
+           auto book = std::make_unique<OrderBookV2>();
+           const auto t = Clock::now();
+           const ReplayStats s = replay(*book, events, [](const Event&, const ExecReport&, const std::vector<Fill>&) {});
+           return PipelineResult{secondsSince(t), s.fills};
+         }},
+        {"spsc_pop1", [&] { return runPipeline<OrderBookV2, SpscQueue<Event>>(events, cap, 1); }},
+        {"spsc_batch64", [&] { return runPipeline<OrderBookV2, SpscQueue<Event>>(events, cap, 64); }},
+        {"mutex_pop1", [&] { return runPipeline<OrderBookV2, MutexQueue<Event>>(events, cap, 1); }},
+    };
+    std::string pj = "{\n  \"events\": " + std::to_string(events.size()) + ",\n  \"queueCapacity\": " +
+                     std::to_string(cap) + ",\n  \"reps\": " + std::to_string(preps) + ",\n  \"modes\": {";
+    std::printf("\npipeline (engine v2, queue capacity %zu, %d reps after 1 warm-up):\n", cap, preps);
+    for (std::size_t m = 0; m < modes.size(); ++m) {
+      modes[m].run();  // warm-up
+      std::vector<double> rates;
+      std::uint64_t fills = 0;
+      for (int r = 0; r < preps; ++r) {
+        const PipelineResult pr = modes[m].run();
+        rates.push_back(static_cast<double>(events.size()) / pr.seconds);
+        fills = pr.fills;
+      }
+      std::printf("  %-14s median %12.0f events/s  (fills %llu)  runs:", modes[m].name, median(rates),
+                  static_cast<unsigned long long>(fills));
+      pj += std::string(m ? "," : "") + "\n    \"" + modes[m].name + "\": {\"medianEventsPerSec\": " +
+            num(median(rates)) + ", \"fills\": " + std::to_string(fills) + ", \"runs\": [";
+      for (std::size_t i = 0; i < rates.size(); ++i) {
+        std::printf(" %.0f", rates[i]);
+        pj += (i ? ", " : "") + num(rates[i]);
+      }
+      std::printf("\n");
+      pj += "]}";
+    }
+    pj += "\n  }\n}\n";
+    if (args.contains("pipeline-json")) {
+      std::FILE* f = std::fopen(args.at("pipeline-json").c_str(), "wb");
+      if (!f) throw std::runtime_error("cannot write " + args.at("pipeline-json"));
+      std::fwrite(pj.data(), 1, pj.size(), f);
+      std::fclose(f);
+      std::printf("wrote %s\n", args.at("pipeline-json").c_str());
+    }
+  }
   if (reps <= 0) return 0;
 
   // ---- Benchmarks ----

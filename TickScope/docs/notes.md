@@ -488,3 +488,58 @@ C++ engine's own counters — two independent implementations agree.
 **Likely questions:** what slippage and realized spread measure and why a market maker
 cares; broadcast vs sort-merge join and when Spark picks each; why the synthetic makers lost
 money and how a real one would protect itself (faster requotes, wider spreads, skewing).
+
+## Phase 8 — SPSC lock-free ring buffer and two-thread pipeline
+
+**What exists:** `SpscQueue<T>` (`spsc_queue.hpp`), `MutexQueue<T>` baseline and
+`runPipeline` (`pipeline.hpp`), `--pipeline` mode in `tickscope_replay`; 7 tests including
+two 10M-item stress tests and a lockstep handoff test; a CI job running them under TSan.
+
+**Headline:** SPSC is 5.4× a mutex queue (7.4× with batch pops); batch-64 pipeline reaches
+95% of single-thread throughput; single thread still wins because the producer does no work.
+
+**Design to be able to explain**
+
+1. **Indices never wrap, buffer is a power of two.** `head`/`tail` are 64-bit counters
+   that only increase; slot = index & (capacity − 1). Full is `tail − head == capacity`,
+   empty is `tail == head`, so no slot is wasted and there is no modulo division.
+
+2. **Acquire/release, exactly where needed.**
+   - Producer: write slot → `tail.store(release)`. Release guarantees the slot write is
+     visible to any thread that acquires that tail value.
+   - Consumer: `tail.load(acquire)` → read slot. Acquire guarantees it sees the write.
+   - Consumer: read slot → `head.store(release)`; producer: `head.load(acquire)` before
+     reusing a slot, so it never overwrites data still being read.
+   - Each thread reads its *own* index with `relaxed`: no other thread writes it.
+   No `seq_cst` fences: on ARM, acquire/release compile to `ldar`/`stlr`, cheaper than full
+   barriers.
+
+3. **Cached opposite index.** The producer keeps a private copy of `head` and only reloads
+   the shared one when its copy says "full" (consumer symmetric with `tail`). Most pushes
+   then touch only producer-owned cache lines — fewer cross-core cache misses.
+
+4. **False sharing and the 128-byte line.** Producer state and consumer state are on
+   separate `alignas(128)` blocks. If `head` and `tail` shared a line, every push would
+   invalidate the consumer's copy and vice versa (the line "ping-pongs" between cores)
+   even though they never touch the same variable. Apple M-series lines are 128 bytes
+   (`sysctl hw.cachelinesize`), x86 is 64 — padding to 64 would not be enough here.
+
+5. **Batch pop.** `popBatch` reads up to N slots and publishes `head` once: one cache-line
+   transfer per batch instead of per item. That is the 36.9M → 50.7M events/s jump.
+
+6. **Busy-wait with a pause hint.** `yield` on ARM / `_mm_pause` on x86 inside spin loops:
+   lower power, frees resources for a sibling hyper-thread, no context switch. Burns a core
+   — acceptable for a latency-critical dedicated thread, not for a shared machine.
+
+**Testing story (good to tell):** the streaming 10M stress tests passed even with a planted
+"publish before writing the slot" bug — the producer runs ahead, and the *next* release of
+`tail` happens to order the buggy write, so neither the value checks nor TSan saw a problem.
+A lockstep handoff test (one item in flight, acknowledgement only consumer→producer) makes
+each slot depend on its own release, and catches it. Weakening a single `release` or
+`acquire` to `relaxed` was not caught by tests or TSan: memory-order bugs can hide from
+dynamic tools; proving them needs model checking (GenMC/CDSChecker) or careful reasoning.
+
+**Likely questions:** explain acquire/release on this queue line by line; what false sharing
+is and how padding fixes it; why SPSC needs no CAS (each index has exactly one writer);
+why the pipeline did not beat one thread; how you would extend to MPSC (CAS on tail, or
+per-producer queues).

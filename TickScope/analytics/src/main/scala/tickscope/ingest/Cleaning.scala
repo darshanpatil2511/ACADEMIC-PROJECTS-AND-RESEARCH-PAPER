@@ -34,12 +34,12 @@ object Cleaning {
 
   def toMicrosCol(ts: Column): Column = when(ts < MicrosThreshold, ts * 1000L).otherwise(ts)
 
-  def readRaw(spark: SparkSession, path: String): DataFrame =
+  def readRaw(spark: SparkSession, paths: String*): DataFrame =
     spark.read
       .schema(rawSchema)
       .option("header", "false")
       .option("mode", "PERMISSIVE")
-      .csv(path)
+      .csv(paths: _*)
 
   private val Reason = "reject"
   private val noReason: Column = lit(null).cast(StringType)

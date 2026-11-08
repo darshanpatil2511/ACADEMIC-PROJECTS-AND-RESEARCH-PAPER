@@ -137,3 +137,36 @@ p50 is below timer resolution for both engines (reported as <41 ns).
 
 v1 add+cancel cost grows with depth (61 → 85 ns, the O(log L) tree insert); v2 is flat
 (18.5 → 19.0 ns): the level is an array index.
+
+---
+
+## 2026-11-07 — Two-thread pipeline (Phase 8): SPSC queue vs mutex vs single thread
+
+Producer thread pushes the pre-built 13,568,286-event stream (Nov 5, defaults) into a
+4,096-slot queue; the engine thread (v2) pops and matches. Busy-wait with a CPU pause hint
+on both sides. 1 warm-up + 5 runs per mode. Every mode produced the same 6,406,577 fills.
+Command: `./build-rel/tickscope_replay --engine v2 --pipeline 5 --pipeline-json results/pipeline.json`
+
+| Mode | Runs (events/s) | Median |
+|---|---|---|
+| single thread (no queue) | 53,229,160 · 53,192,590 · 52,932,230 · 53,092,569 · 53,144,011 | 53,144,011 |
+| SPSC lock-free, pop 1 | 37,011,882 · 36,923,964 · 36,848,818 · 36,936,835 · 37,244,891 | 36,936,835 |
+| SPSC lock-free, batch pop 64 | 50,707,873 · 50,725,606 · 50,693,349 · 50,734,845 · 50,752,732 | 50,725,606 |
+| mutex-protected ring, pop 1 | 6,749,097 · 6,739,722 · 6,856,645 · 6,857,976 · 7,080,739 | 6,856,645 |
+
+- SPSC (pop 1) is **5.4×** the mutex queue; SPSC batch-64 is **7.4×**.
+- Batching recovers the pipeline to **95%** of single-thread throughput.
+- The pipeline does **not** beat one thread here: the producer only copies a pre-built
+  event, so the queue hand-off is pure overhead. A second thread pays off when the producer
+  does real work (network I/O, parsing) that would otherwise sit on the matching thread.
+
+## 2026-11-07 — ThreadSanitizer and mutation results for the SPSC queue
+
+- Correct code: all SPSC tests pass under TSan, 3 repeats at 10M items (local, Apple
+  clang 21) and 3 repeats at 1M items in CI (Linux).
+- Planted "publish index before writing slot": **caught** by the lockstep handoff test
+  (stale slot read), after the 10M streaming tests had **missed** it (a later release of
+  the index orders the earlier write, so TSan saw no race in that interleaving).
+- Planted `release`→`relaxed` on the producer's publish, or `acquire`→`relaxed` on the
+  consumer's load: **not caught** by the tests or by TSan on this toolchain. Memory-order
+  weakening needs a model checker (e.g. GenMC, CDSChecker) to prove; documented as a limit.
