@@ -543,3 +543,54 @@ dynamic tools; proving them needs model checking (GenMC/CDSChecker) or careful r
 is and how padding fixes it; why SPSC needs no CAS (each index has exactly one writer);
 why the pipeline did not beat one thread; how you would extend to MPSC (CAS on tail, or
 per-producer queues).
+
+## Phase 9 — Spark benchmark, incremental ingestion, README
+
+**What exists:** `SparkBench` (5 variants × 3 runs, scan metrics from Spark's own SQL
+metrics, physical plans in `docs/spark-plans.md`), per-day incremental `IngestJob`, the
+README. 30 days ingested: 84,744,597 trades, 0 dropped, 843 s, 1.0 GB Parquet.
+
+**Headline:** partition-pruned Parquet is ≥31× faster than naive gzip CSV on the same
+workload (31.1× and 52.2× in two sessions; the CSV baseline is the noisy side).
+
+**Decisions to be able to explain**
+
+1. **Why Parquet beats CSV.** Columnar: reads only the columns a query uses. Binary typed
+   encoding: no text parsing per value. Per-column compression and encodings (dictionary,
+   RLE). Splittable files with row groups; gzip CSV is one non-splittable stream per file.
+   Footer statistics (min/max per row group) allow predicate pushdown.
+
+2. **Partition pruning vs predicate pushdown.** Data is laid out as `date=YYYY-MM-DD/`
+   directories. A filter on `date` becomes a `PartitionFilter`: resolved against directory
+   names at planning time, so 23 of 30 directories are never listed or opened (7 files read).
+   A filter on `tsUs` is a `PushedFilter`: Parquet must open every file's footer to check
+   row-group statistics (30 files read). Both are visible in `docs/spark-plans.md`.
+
+3. **Why caching made it slower.** `cache()` is lazy; the first action builds an in-memory
+   columnar copy (~4 s here). It pays off only if that cost is amortized over many reuses,
+   or if the source is expensive (remote storage, CSV parsing). Two queries over 7 local,
+   compact Parquet files are faster read directly by the vectorized reader.
+
+4. **Why `shuffle.partitions` did nothing.** Spark 3.x Adaptive Query Execution looks at
+   real shuffle sizes after each stage and coalesces small partitions: the 200 configured
+   partitions became 1 (metric: `AQEShuffleReadExec.partitionSpecs`). Manual tuning
+   mattered before AQE was on by default (Spark 3.2).
+
+5. **Incremental ingestion (a real failure).** The first 30-day ingest persisted all raw
+   and classified rows at once and filled the laptop's disk with spill ("No space left on
+   device"). Fix: process one day file per batch with dynamic partition overwrite
+   (`partitionOverwriteMode=dynamic` replaces only that day's directory), serialized
+   storage for the persisted frames. Peak resource use is now bounded by one day; reruns are
+   idempotent per day; `--skip-existing` makes it incremental. Valid because Binance daily
+   files do not overlap, so per-day duplicate/order checks lose nothing.
+
+6. **Benchmark hygiene.** Same data and query for every variant; fresh SparkSession per
+   run; `noop` sink so output I/O is not timed; medians of 3; scan facts from engine
+   metrics, not from `inputFiles` (which lists every file in the table — an early version of
+   the harness reported "30 files" for the pruned scan because of that, and was fixed).
+
+**Likely questions:** which steps shuffle and how you reduced it; how partition pruning works
+on this layout; why Parquet beats CSV; Dataset vs DataFrame (typed case classes for the
+pipeline stages, untyped DataFrame operations where Spark functions like `min_by` and window
+functions are clearer); what you would change on a cluster (S3 paths, `provided` Spark
+dependency, executor sizing, more partitions per day).

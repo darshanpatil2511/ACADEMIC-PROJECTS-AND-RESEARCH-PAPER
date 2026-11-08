@@ -1,5 +1,7 @@
 # TickScope — Build Plan
 
+> **Status (2026-11-07):** Phases 0–9 done (see `docs/bench.md`, `docs/notes.md`). Remaining: Phase 10 dashboard; optional EMR run. Spark data: 30 days (disk-limited) instead of 1–3 months.
+
 A C++20 limit order book and matching engine for the latency path, a Scala/Spark
 pipeline for market-data research, and a static dashboard that shows the results.
 Data: Binance BTCUSDT spot trades (data.binance.vision).

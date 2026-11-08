@@ -3,6 +3,8 @@ package tickscope.bench
 import java.nio.charset.StandardCharsets
 import java.nio.file.{Files, Paths}
 
+import org.apache.spark.sql.execution.FileSourceScanExec
+import org.apache.spark.sql.execution.adaptive.{AQEShuffleReadExec, AdaptiveSparkPlanHelper}
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.{DataFrame, SparkSession}
 import tickscope.ingest.Cleaning
@@ -19,13 +21,22 @@ import tickscope.{Args, Spark}
   *      --from 2026-10-30 --to 2026-11-05 --runs 3 --json ../results/spark_bench.json
   *      --plans ../docs/spark-plans.md"
   */
-object SparkBench {
+object SparkBench extends AdaptiveSparkPlanHelper {
 
   final case class Variant(name: String, description: String, shufflePartitions: Int, cache: Boolean,
                            load: SparkSession => DataFrame)
 
-  final case class Result(variant: Variant, runsSec: Seq[Double], filesRead: Int, rows: Long) {
-    def median: Double = runsSec.sorted.apply(runsSec.size / 2)
+  /** One timed run: total = cache build (if any) + Q1 + Q2. */
+  final case class Run(totalSec: Double, cacheBuildSec: Double, queriesSec: Double)
+
+  /** What the scan really did, from Spark's own SQL metrics after executing Q2. */
+  final case class ScanStats(filesRead: Long, partitionsRead: Long, shufflePartitionsAfterAqe: Long, rows: Long)
+
+  final case class Result(variant: Variant, runs: Seq[Run], scan: ScanStats) {
+    private def med(xs: Seq[Double]) = xs.sorted.apply(xs.size / 2)
+    def median: Double = med(runs.map(_.totalSec))
+    def medianCacheBuild: Double = med(runs.map(_.cacheBuildSec))
+    def medianQueries: Double = med(runs.map(_.queriesSec))
   }
 
   /** Q1: 1-minute bars. Shuffle: hash-partition by bar start. */
@@ -85,19 +96,33 @@ object SparkBench {
     )
   }
 
-  def runOnce(v: Variant): (Double, Int, Long) = {
+  def runOnce(v: Variant): Run = {
     val spark = Spark.local(s"bench-${v.name}", v.shufflePartitions)
     try {
       val start = System.nanoTime()
       val base = v.load(spark)
       val input = if (v.cache) { val c = base.cache(); c.count(); c } else base
+      val afterCache = System.nanoTime()
       q1Bars(input).write.format("noop").mode("overwrite").save()
       q2Daily(input).write.format("noop").mode("overwrite").save()
-      val secs = (System.nanoTime() - start) / 1e9
-      val files = base.inputFiles.length
-      val rows = input.count() // not timed
+      val end = System.nanoTime()
       if (v.cache) input.unpersist(blocking = true)
-      (secs, files, rows)
+      Run((end - start) / 1e9, (afterCache - start) / 1e9, (end - afterCache) / 1e9)
+    } finally spark.stop()
+  }
+
+  /** Untimed: execute Q2 on the uncached input and read the scan and shuffle metrics. */
+  def scanStats(v: Variant): ScanStats = {
+    val spark = Spark.local(s"scan-${v.name}", v.shufflePartitions)
+    try {
+      val base = v.load(spark)
+      val q = q2Daily(base)
+      q.collect()
+      val plan = q.queryExecution.executedPlan
+      val scans = collect(plan) { case s: FileSourceScanExec => s }
+      def metric(name: String) = scans.map(s => s.metrics.get(name).map(_.value).getOrElse(0L)).sum
+      val shuffleParts = collect(plan) { case r: AQEShuffleReadExec => r.partitionSpecs.size.toLong }.sum
+      ScanStats(metric("numFiles"), metric("numPartitions"), shuffleParts, base.count())
     } finally spark.stop()
   }
 
@@ -112,23 +137,26 @@ object SparkBench {
     o.get("plans").foreach(p => writePlans(p, raw, clean, from, to))
 
     val results = all.map { v =>
+      val scan = scanStats(v)
       val rs = (1 to runs).map { i =>
-        val (secs, files, rows) = runOnce(v)
-        println(f"  ${v.name}%-20s run $i: $secs%.2f s  ($files files, $rows%,d rows)")
-        (secs, files, rows)
+        val r = runOnce(v)
+        println(f"  ${v.name}%-20s run $i: ${r.totalSec}%.2f s (cache build ${r.cacheBuildSec}%.2f s, queries ${r.queriesSec}%.2f s)")
+        r
       }
-      Result(v, rs.map(_._1), rs.head._2, rs.head._3)
+      println(f"  ${v.name}%-20s scan: ${scan.filesRead} files, ${scan.partitionsRead} date partitions, ${scan.rows}%,d rows; Q2 shuffle partitions after AQE: ${scan.shufflePartitionsAfterAqe}")
+      Result(v, rs, scan)
     }
 
     val baseline = results.head.median
-    println(f"\n%%-20s %%10s %%8s %%7s %%14s".format("variant", "median s", "vs csv", "files", "rows"))
+    println("\n%-20s %9s %8s %11s %9s %6s %6s %9s".format("variant", "median s", "vs csv", "cache s", "query s", "files", "parts", "aqeParts"))
     results.foreach { r =>
-      println(f"${r.variant.name}%-20s ${r.median}%10.2f ${baseline / r.median}%7.2fx ${r.filesRead}%7d ${r.rows}%,14d")
+      println(f"${r.variant.name}%-20s ${r.median}%9.2f ${baseline / r.median}%7.2fx ${r.medianCacheBuild}%11.2f ${r.medianQueries}%9.2f ${r.scan.filesRead}%6d ${r.scan.partitionsRead}%6d ${r.scan.shufflePartitionsAfterAqe}%9d")
     }
 
     o.get("json").foreach { p =>
       val body = results.map { r =>
-        s"""    {"variant": "${r.variant.name}", "description": "${r.variant.description}", "shufflePartitions": ${r.variant.shufflePartitions}, "cache": ${r.variant.cache}, "runsSec": ${r.runsSec.mkString("[", ", ", "]")}, "medianSec": ${r.median}, "speedupVsCsv": ${baseline / r.median}, "filesRead": ${r.filesRead}, "rows": ${r.rows}}"""
+        val rs = r.runs.map(x => f"""{"totalSec": ${x.totalSec}%.3f, "cacheBuildSec": ${x.cacheBuildSec}%.3f, "queriesSec": ${x.queriesSec}%.3f}""").mkString("[", ", ", "]")
+        s"""    {"variant": "${r.variant.name}", "description": "${r.variant.description}", "shufflePartitions": ${r.variant.shufflePartitions}, "cache": ${r.variant.cache}, "runs": $rs, "medianSec": ${r.median}, "medianCacheBuildSec": ${r.medianCacheBuild}, "medianQueriesSec": ${r.medianQueries}, "speedupVsCsv": ${baseline / r.median}, "filesRead": ${r.scan.filesRead}, "datePartitionsRead": ${r.scan.partitionsRead}, "q2ShufflePartitionsAfterAqe": ${r.scan.shufflePartitionsAfterAqe}, "rows": ${r.scan.rows}}"""
       }.mkString(",\n")
       val json = s"""{\n  "window": {"from": "$from", "to": "$to"},\n  "runsPerVariant": $runs,\n  "variants": [\n$body\n  ]\n}\n"""
       Files.write(Paths.get(p), json.getBytes(StandardCharsets.UTF_8))

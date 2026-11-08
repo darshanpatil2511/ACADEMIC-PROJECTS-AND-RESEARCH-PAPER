@@ -170,3 +170,49 @@ Command: `./build-rel/tickscope_replay --engine v2 --pipeline 5 --pipeline-json 
 - Planted `release`→`relaxed` on the producer's publish, or `acquire`→`relaxed` on the
   consumer's load: **not caught** by the tests or by TSan on this toolchain. Memory-order
   weakening needs a model checker (e.g. GenMC, CDSChecker) to prove; documented as a limit.
+
+---
+
+## 2026-11-07 — Spark pipeline benchmark (Phase 9)
+
+**Data:** 30 days of Binance BTCUSDT spot trades, 2026-10-07 → 2026-11-05: 84,744,597
+trades (594 MB gzip CSV in; 1.0 GB Parquet partitioned by date after ingestion).
+**Workload (one run):** for the last 7 days (2026-10-30 → 2026-11-05, 22,520,393 trades),
+Q1 = 1-minute OHLCV + VWAP bars, Q2 = daily summary; both written to Spark's `noop` sink
+(full execution, no output I/O). Fresh SparkSession per run (start-up not timed); OS page
+cache warm across runs. Spark 3.5.5 local[*] on 8 cores, 4 GB heap, AQE on (Spark default).
+**Scan metrics** (files, date partitions, shuffle partitions after AQE) come from Spark's own
+SQL metrics after executing Q2 (`FileSourceScanExec.numFiles/numPartitions`, `AQEShuffleReadExec`).
+Command: `sbt "runMain tickscope.bench.SparkBench --raw ../data/raw --clean ../data/clean --from 2026-10-30 --to 2026-11-05 --runs 3 --json ../results/spark_bench.json --plans ../docs/spark-plans.md"`
+
+| Variant | Runs (s) | Median (s) | vs CSV | Cache build (s) | Queries (s) | Files read | Date partitions | Shuffle partitions after AQE |
+|---|---|---|---|---|---|---|---|---|
+| 1 CSV naive (gzip re-parsed, 200 partitions) | 81.38 · 85.34 · 77.66 | 81.38 | 1.00× | — | 81.37 | 30 | — | 1 |
+| 2 Parquet, filter on `tsUs` (row-group pushdown) | 2.82 · 2.40 · 2.51 | 2.51 | 32.4× | — | 2.45 | 30 | 30 | 1 |
+| 3 Parquet + partition pruning on `date` | 1.72 · 1.56 · 1.54 | **1.56** | **52.2×** | — | 1.50 | **7** | **7** | 1 |
+| 4 = 3 + cache filtered input | 6.03 · 6.01 · 5.65 | 6.01 | 13.5× | 4.02 | 1.96 | 7 | 7 | 1 |
+| 5 = 4 + `shuffle.partitions = 8` | 6.15 · 6.22 · 5.06 | 6.15 | 13.2× | 3.60 | 2.41 | 7 | 7 | 1 |
+
+(For variants 1–3 the "cache build" column measured only plan construction, 0.01–0.07 s.)
+
+**Run-to-run variance across sessions.** An earlier session of the same harness (before the
+scan-metric fix) measured CSV 45.67 · 47.82 · 72.90 s (median **47.82 s**) and pruned
+Parquet 1.54 · 1.65 · 1.53 s (median **1.54 s**): a **31.1×** speedup. The CSV baseline is
+the noisy one (laptop thermal state). **Conservative headline: partition-pruned Parquet is
+≥31× faster than naive CSV on this workload (≥96.8% less runtime).**
+
+**What the numbers say**
+- **CSV → Parquet (32×):** columnar reads (only the columns each query uses), typed binary
+  encoding instead of text parsing, splittable files, compression per column; gzip CSV is
+  not even splittable (one task per day file).
+- **Partition pruning (2.51 → 1.56 s):** the `date` filter is resolved against directory
+  names at planning time (`PartitionFilters: [... date >= 2026-10-30, date <= 2026-11-05]`
+  in `docs/spark-plans.md`), so 23 of 30 directories are never opened. The `tsUs` filter
+  (`PushedFilters`) still has to open all 30 files to read footer statistics.
+- **Caching did not help (6.01 s vs 1.56 s):** building the in-memory columnar cache took
+  ~4 s, and even the queries afterwards were not faster than the vectorized Parquet reader
+  on 7 compact local files. Caching pays off when the same expensive input (e.g. remote,
+  or CSV) is reused many times; two queries on local Parquet is the wrong case.
+- **Shuffle partitions 200 vs 8: no effect,** because Adaptive Query Execution coalesced
+  the shuffle to 1 partition in every variant (the aggregated output is tiny). Manual
+  tuning mattered before AQE (Spark < 3.2 default off).
