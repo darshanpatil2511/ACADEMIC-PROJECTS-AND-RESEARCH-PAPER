@@ -1,14 +1,56 @@
 # TickScope
 
-**A C++20 limit order book and matching engine that replays real Binance BTCUSDT order flow,
-plus a Scala/Apache Spark pipeline for market-data research.** The engine runs the
-latency-critical path: price-time priority matching, O(1) cancels, a cache-friendly v2 at
-**52M events/s (1.76× v1, 2.20× on a deep book)** and a lock-free SPSC queue. The Spark side
-runs the research path: it cleans 84.7M real trades, builds bars and statistics, and analyzes
-the engine's fills, with a partition-pruned Parquet layout **≥31× faster than naive CSV**.
-**Live results dashboard:** [darshanpatil2511.github.io/ACADEMIC-PROJECTS-AND-RESEARCH-PAPER/tickscope/dashboard](https://darshanpatil2511.github.io/ACADEMIC-PROJECTS-AND-RESEARCH-PAPER/tickscope/dashboard/) (charts, an animated order-book replay of the busiest minute, all loaded from `results/`).
-Every number in this README comes from a recorded run in [`docs/bench.md`](docs/bench.md) or
-[`reports/stats.md`](reports/stats.md).
+**I built a stock-exchange-style matching engine from scratch, ran real Bitcoin trading
+activity through it, and studied the results with a big-data pipeline.**
+
+**[See the live results dashboard →](https://darshanpatil2511.github.io/ACADEMIC-PROJECTS-AND-RESEARCH-PAPER/tickscope/dashboard/)**
+
+## Why this project
+
+Every exchange has the same piece of software at its center: the **matching engine**. Buyers
+and sellers send orders, and the engine keeps them in an **order book**, a list of who wants
+to buy or sell at what price. When a buyer and a seller agree on a price, the engine matches
+them into a trade. It has to be fair (first come, first served at each price) and exact, and it
+has to do this millions of times a second.
+
+I wanted to understand how these systems work by building one myself. I also wanted to test it
+on real market activity rather than made-up numbers, and see what that activity says about how
+markets behave. TickScope does both.
+
+## What it does
+
+**1. The engine: fast, and verified correct.** I wrote the engine twice. Version 1 is the
+straightforward design. Version 2 is rebuilt for speed: it lays data out so the processor
+rarely waits on memory. Version 2 handles **52 million order events per second**, which is
+**1.76× faster** than version 1 and **2.20× faster** when the book is crowded. Both versions
+produce exactly the same trades, and every change is checked against a deliberately simple
+reference version. A separate experiment passes orders between two threads through a lock-free
+queue and measures what that hand-off costs.
+
+**2. The data: real trades, real research.** Binance publishes every Bitcoin trade. TickScope
+downloads **30 days (84.7 million trades)**, cleans them with Apache Spark and turns them into
+per-minute prices and statistics. Storing the data in a smarter layout made the same queries
+**at least 31× faster** than reading the raw files. The real buy and sell orders are then
+replayed through the engine, and the pipeline measures how well those simulated trades were
+executed.
+
+**3. What the data showed.**
+- Bitcoin has far more extreme moves than textbook models expect. The data has 82 one-minute
+  moves beyond 4 standard deviations, where a normal distribution predicts fewer than one.
+- A burst of buying pressure does slightly predict the next minute's price, and the effect is
+  statistically significant. It is far too small to trade on, though.
+- Some optimizations backfired. Caching data made Spark *slower*, and the benchmarks record that
+  rather than hide it.
+
+**An honest limit:** Binance publishes completed trades, not the full order book, so the
+engine's resting orders are simulated and the real trades are replayed against them. The
+dashboard says the same.
+
+**Built with:** C++20, Scala, Apache Spark, Parquet, GoogleTest, Google Benchmark, GitHub
+Actions (tests run with memory and thread-safety checkers on every push).
+
+Every number here comes from a recorded run in [`docs/bench.md`](docs/bench.md) or
+[`reports/stats.md`](reports/stats.md), with the date, machine and settings.
 
 ## Architecture
 
